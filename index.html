@@ -313,7 +313,7 @@
         formattedText = formattedText.replace(/\n/g, "<br>");
 
         // Step 5: Wrap in div with dynamic font size and Yu Gothic UI font
-        rawFormattedHTML = `<div class="formatted-text" style="font-family:'Yu Gothic UI',sans-serif;font-size: ${fontSize}pt;">${formattedText}</div>`;
+        rawFormattedHTML = `<div style="font-family:'Yu Gothic UI',sans-serif;font-size: ${fontSize}pt;">${formattedText}</div>`;
 
         // Show formatted code with syntax highlighting
         document.getElementById("output").innerHTML =
