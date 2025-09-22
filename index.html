@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Text Formatter</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f9f9f9;
+        color: #333;
+      }
+      h1 {
+        font-size: 1.8em;
+        margin-bottom: 0.2em;
+        text-align: center;
+        color: #4a4a4a;
+      }
+      label {
+        font-weight: 600;
+        margin-bottom: 0.4em;
+        display: block;
+        font-size: 1.1em;
+      }
+      textarea {
+        width: 100%;
+        font-family: "Yu Gothic UI", sans-serif;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 120px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        box-shadow: inset 0 1px 3px #ddd;
+        transition: border-color 0.3s ease;
+      }
+      textarea:focus {
+        border-color: #4a90e2;
+        outline: none;
+        box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+      }
+      input[type="number"] {
+        width: 80px;
+        padding: 6px 10px;
+        margin: 0 10px 20px 0;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        box-shadow: inset 0 1px 3px #ddd;
+        transition: border-color 0.3s ease;
+      }
+      input[type="number"]:focus {
+        border-color: #4a90e2;
+        outline: none;
+        box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+      }
+      .font-size-container {
+        margin-bottom: 10px;
+      }
+      button {
+        display: inline-block;
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1em;
+        padding: 12px 20px;
+        cursor: pointer;
+        margin: 20px 10px 20px 0;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #3a78c2;
+      }
+      #btnCopy {
+        background-color: #27ae60;
+      }
+      #btnCopy:hover {
+        background-color: #1e8449;
+      }
+      pre#output {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 20px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: inset 0 0 10px #222;
+      }
+      /* Highlight HTML tags */
+      .tag {
+        color: #f92672;
+        font-weight: bold;
+      }
+      /* Highlight attribute names */
+      .attr {
+        color: #66d9ef;
+      }
+      /* Highlight attribute values */
+      .value {
+        color: #e6db74;
+      }
+      /* Highlight punctuation */
+      .punct {
+        color: #f8f8f2;
+      }
+      .note {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Text Formatter for Japanese and English</h1>
+
+    <div class="font-size-container">
+      <label for="fontSizeInput">Font size (pt):</label>
+      <input
+        type="number"
+        id="fontSizeInput"
+        min="5"
+        max="72"
+        value="10.5"
+        step="0.1"
+      />
+      <span class="note">Enter font size in points (e.g., 10.5)</span>
+    </div>
+
+    <label for="inputText">Enter your text below:</label>
+    <textarea id="inputText" placeholder="Paste your text here…"></textarea>
+    <div class="note">
+      Supports Japanese + English text spacing and formatting
+    </div>
+
+    <button onclick="formatText()">Format Text</button>
+    <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
+
+    <label for="output">Formatted HTML Code Output:</label>
+    <pre id="output" readonly></pre>
+
+    <script>
+      let rawFormattedHTML = ""; // Global variable to store raw formatted text
+
+      function escapeHTML(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      // Simple syntax highlighter for the output HTML code:
+      function syntaxHighlight(html) {
+        let escaped = escapeHTML(html);
+
+        escaped = escaped.replace(
+          /(&lt;\/?)([\w-]+)([^&]*?)(&gt;)/g,
+          (match, p1, tagName, attrs, p4) => {
+            let highlightedTag = `<span class="tag">${tagName}</span>`;
+            let highlightedAttrs = attrs.replace(
+              /([\w-]+)(=)("[^"]*")/g,
+              (m, attrName, eq, attrValue) =>
+                `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
+            );
+            return `${p1}${highlightedTag}${highlightedAttrs}${p4}`;
+          }
+        );
+
+        return escaped;
+      }
+
+      function formatText() {
+        let inputText = document.getElementById("inputText").value;
+        let fontSize = document.getElementById("fontSizeInput").value.trim();
+
+        if (!inputText.trim()) {
+          alert("Please enter some text to format.");
+          return;
+        }
+        if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
+          alert("Please enter a valid positive font size.");
+          return;
+        }
+
+        // Step 1: Add space between Japanese and English (and numbers)
+        let formattedText = inputText
+          .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
+          .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
+
+        // Step 2: Wrap sequences of English words and numbers in ONE <span>
+        formattedText = formattedText.replace(
+          /([A-Za-z0-9 ]+)/g,
+          (match) => `<span style="font-family: 'Segoe UI'">${match}</span>`
+        );
+
+        // Step 3: Add space after specific punctuation marks
+        formattedText = formattedText.replace(/([。！？、，．；：])/g, "$1 ");
+
+        // Step 4: Preserve line breaks by replacing newlines with <br>
+        formattedText = formattedText.replace(/\n/g, "<br>");
+
+        // Step 5: Wrap in div with dynamic font size and Yu Gothic UI font
+        rawFormattedHTML = `<div class="formatted-text" style="font-family:'Yu Gothic UI',sans-serif;font-size: ${fontSize}pt;">${formattedText}</div>`;
+
+        // Show result in output area with syntax highlighting
+        document.getElementById("output").innerHTML =
+          syntaxHighlight(rawFormattedHTML);
+      }
+
+      function copyOutput() {
+        if (!rawFormattedHTML) {
+          alert("No formatted code to copy. Please format your text first.");
+          return;
+        }
+
+        navigator.clipboard.writeText(rawFormattedHTML).then(
+          () => {
+            alert("Formatted HTML code copied to clipboard!");
+          },
+          () => {
+            alert("Failed to copy. Please copy manually.");
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
