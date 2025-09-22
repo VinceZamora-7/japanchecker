@@ -303,7 +303,7 @@
         // Step 2: Wrap sequences of English words and numbers in ONE <span>
         formattedText = formattedText.replace(
           /([A-Za-z0-9 ]+)/g,
-          (match) => `<span style="font-family: 'Segoe UI'">${match}</span>`
+          (match) => `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
         );
 
         // Step 3: Add space after specific punctuation marks
