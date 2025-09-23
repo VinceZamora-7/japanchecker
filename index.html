@@ -233,16 +233,19 @@
       function syntaxHighlight(html) {
         let escaped = escapeHTML(html);
 
+        // Match tags with optional slash, tagName, attributes, and closing angle bracket
         escaped = escaped.replace(
-          /(&lt;\/?)([\w-]+)([^&]*?)(&gt;)/g,
-          (match, p1, tagName, attrs, p4) => {
+          /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
+          (match, lt, slash, tagName, attrs, gt) => {
             let highlightedTag = `<span class="tag">${tagName}</span>`;
             let highlightedAttrs = attrs.replace(
               /([\w-]+)(=)("[^"]*")/g,
               (m, attrName, eq, attrValue) =>
                 `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
             );
-            return `${p1}<span class="punct">&lt;</span>${highlightedTag}${highlightedAttrs}<span class="punct">&gt;</span>`;
+
+            // Wrap < and > separately; slash stays outside
+            return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
           }
         );
 
