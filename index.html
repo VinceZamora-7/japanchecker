@@ -172,19 +172,22 @@
     </style>
   </head>
   <body>
-    <h1>Text Formatter for marketo</h1>
-
+    <h1>InstaFont</h1>
+    <div class="note">
+      Disclaimer: This application only formats the appropriate font family per language and does not apply any styling such as padding, margin, positioning, color, bold, or italic, as it only accepts plain text.
+    </div>
+ 
     <div class="font-size-container">
       <label for="fontSizeInput">Font size (pt):</label>
       <input
         type="number"
         id="fontSizeInput"
-        min="5"
-        max="72"
+        min="10.5"
+        max="15"
         value="10.5"
         step="0.1"
       />
-
+ 
       <label for="languageSelect">Language group:</label>
       <select id="languageSelect">
         <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
@@ -199,28 +202,25 @@
         <option value="'Yu Gothic UI'" selected>Japanese</option>
         <option value="'Lao UI'">Lao</option>
       </select>
-
+ 
       <span class="note">Choose font for base language text</span>
     </div>
-
+ 
     <label for="inputText">Enter your text below:</label>
     <textarea id="inputText" placeholder="Paste your text here…"></textarea>
-    <div class="note">
-      Supports Different Languages + English text spacing and formatting
-    </div>
-
+ 
     <button onclick="formatText()">Format Text</button>
     <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
-
+ 
     <label for="output">Formatted HTML Code Output:</label>
     <pre id="output" readonly></pre>
-
+ 
     <label for="nonEnglishOutput">Non-English Characters Highlighted:</label>
     <pre id="nonEnglishOutput" readonly></pre>
-
+ 
     <script>
       let rawFormattedHTML = "";
-
+ 
       function escapeHTML(str) {
         return str
           .replace(/&/g, "&amp;")
@@ -229,10 +229,10 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#39;");
       }
-
+ 
       function syntaxHighlight(html) {
         let escaped = escapeHTML(html);
-
+ 
         // Match tags with optional slash, tagName, attributes, and closing angle bracket
         escaped = escaped.replace(
           /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
@@ -243,79 +243,79 @@
               (m, attrName, eq, attrValue) =>
                 `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
             );
-
+ 
             // Wrap < and > separately; slash stays outside
             return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
           }
         );
-
+ 
         return escaped;
       }
-
+ 
       function highlightNonEnglishChars(text) {
         // Wrap all non-ASCII characters in a styled span
         return text.replace(/([^\x00-\x7F])/g, (match) => {
           return `<span class="highlight-nonenglish">${match}</span>`;
         });
       }
-
+ 
       function formatText() {
         let inputText = document.getElementById("inputText").value;
         let fontSize = document.getElementById("fontSizeInput").value.trim();
         let languageSelect = document.getElementById("languageSelect");
         let selectedFont = languageSelect.value;
         let selectedText = languageSelect.selectedOptions[0].text;
-
+ 
         if (!inputText.trim()) {
           alert("Please enter some text to format.");
           return;
         }
-
+ 
         if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
           alert("Please enter a valid positive font size.");
           return;
         }
-
+ 
         let formattedText = inputText;
-
+ 
         const isJapanese = selectedFont === "'Yu Gothic UI'";
         const isArabic = selectedText === "Arabic";
-
+ 
         if (isJapanese) {
           formattedText = formattedText
             .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
             .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
-
+ 
           formattedText = formattedText.replace(
             /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
             (match) =>
               `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
           );
         }
-
+ 
         formattedText = formattedText.replace(/\n/g, "<br>");
-
+ 
         let wrapperTag = isJapanese ? "div" : "p";
         let dirAttr = isArabic ? ' dir="rtl"' : "";
         let extraStyle = isArabic ? "text-align: right;" : "";
-
+ 
         rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
-
+ 
         document.getElementById("output").innerHTML =
           syntaxHighlight(rawFormattedHTML);
-
+ 
         // Highlight and show non-English characters only
         let highlightedNonEnglish = highlightNonEnglishChars(inputText);
         document.getElementById("nonEnglishOutput").innerHTML =
           highlightedNonEnglish;
       }
-
+ 
       function copyOutput() {
         if (!rawFormattedHTML) {
           alert("No formatted code to copy. Please format your text first.");
           return;
         }
-
+ 
         navigator.clipboard.writeText(rawFormattedHTML).then(
           () => {
             alert("Formatted HTML code copied to clipboard!");
@@ -328,3 +328,5 @@
     </script>
   </body>
 </html>
+ 
+ 
