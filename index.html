@@ -1,307 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Text Formatter</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Text Formatter</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 24px 30px;
+        background: #f5f7fa;
+        color: #2c3e50;
+        line-height: 1.6;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 30px;
+        text-align: center;
+        color: #34495e;
+        user-select: text;
+      }
+      label {
+        font-weight: 600;
+        margin-bottom: 0.5em;
+        display: block;
+        font-size: 1.125em;
+        color: #34495e;
+        user-select: text;
+      }
+      .font-size-container {
+        background: #fff;
+        padding: 20px 25px 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+        margin-bottom: 30px;
+      }
+      input[type="number"],
+      select {
+        font-size: 1rem;
+        padding: 8px 14px;
+        margin-right: 20px;
+        border-radius: 8px;
+        border: 1.8px solid #bdc3c7;
+        box-shadow: inset 0 2px 6px #e2e6ec;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        min-width: 130px;
+        outline-offset: 2px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      input[type="number"]:focus,
+      select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+        outline: none;
+      }
+      textarea {
+        width: 100%;
+        font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 140px;
+        padding: 16px 18px;
+        border-radius: 12px;
+        border: 1.8px solid #bdc3c7;
+        box-shadow: inset 0 4px 10px #dfe4eb;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        user-select: text;
+      }
+      textarea::placeholder {
+        color: #aab8c2;
+        font-style: italic;
+      }
+      textarea:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 12px rgba(52, 152, 219, 0.5);
+        outline: none;
+      }
+      button {
+        display: inline-block;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1em;
+        font-weight: 600;
+        padding: 14px 28px;
+        cursor: pointer;
+        margin: 25px 12px 35px 0;
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.35);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        font-family: inherit;
+      }
+      button:hover {
+        background-color: #2c80cc;
+        box-shadow: 0 7px 20px rgba(44, 128, 204, 0.6);
+      }
+      #btnCopy {
+        background-color: #27ae60;
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.5);
+      }
+      #btnCopy:hover {
+        background-color: #1e8449;
+        box-shadow: 0 7px 20px rgba(30, 132, 73, 0.7);
+      }
+      pre#output {
+        background: #272822;
+        color: #f8f8f2;
+        padding: 22px 26px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 280px;
+        overflow-y: auto;
+        box-shadow: inset 0 0 16px #222;
+        user-select: text;
+      }
+      #nonEnglishOutput {
+        background: #eaf4fc;
+        color: #1a3d7c;
+        padding: 20px 24px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 1rem;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 160px;
+        overflow-y: auto;
+        box-shadow: inset 0 0 8px #cbe0fc;
+        margin-bottom: 30px;
+        user-select: text;
+      }
+      .highlight-nonenglish {
+        background-color: #a9d1ff;
+        color: #003366;
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+      .tag {
+        color: #ff5370;
+        font-weight: 700;
+        text-shadow: 0 0 4px #ff3a58;
+      }
+      .attr {
+        color: #82aaff;
+        font-weight: 600;
+        text-shadow: 0 0 5px #7199ff;
+      }
+      .value {
+        color: #c3e88d;
+        font-style: normal;
+        font-weight: 600;
+        text-shadow: 0 0 4px #a7d86b;
+      }
+      .punct {
+        color: #f8f8f2;
+        font-weight: 800;
+      }
+      .note {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-style: italic;
+        user-select: text;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Text Formatter for marketo</h1>
 
-    body {
-      font-family: 'Inter', Arial, sans-serif;
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 25px;
-      background: #f3f7fa;
-      color: #222;
-      line-height: 1.5;
-    }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.6em;
-      text-align: center;
-      color: #1a2a42;
-      letter-spacing: 0.04em;
-    }
-    .form-group {
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    label {
-      font-weight: 600;
-      min-width: 140px;
-      font-size: 1.1rem;
-      color: #344050;
-      cursor: pointer;
-    }
-    input[type="number"],
-    select {
-      flex-grow: 1;
-      max-width: 180px;
-      padding: 8px 12px;
-      font-size: 1rem;
-      border: 1.8px solid #c7d0db;
-      border-radius: 8px;
-      background: white;
-      box-shadow: inset 0 2px 6px #e5ebf2;
-      transition: border-color 0.35s ease, box-shadow 0.35s ease;
-      font-family: 'Inter', sans-serif;
-    }
-    input[type="number"]:focus,
-    select:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 8px 1px rgba(59,130,246,0.4);
-      outline: none;
-    }
-    textarea {
-      width: 100%;
-      font-family: 'Yu Gothic UI', 'Inter', sans-serif;
-      font-size: 1rem;
-      resize: vertical;
-      min-height: 140px;
-      padding: 14px 16px;
-      border-radius: 10px;
-      border: 1.5px solid #c0c8d4;
-      box-shadow: inset 0 2px 5px #d6dce9;
-      transition: border-color 0.3s ease;
-      color: #222;
-    }
-    textarea::placeholder {
-      color: #93a3bb;
-      font-style: italic;
-    }
-    textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 10px rgba(59,130,246,0.5);
-      outline: none;
-    }
-    .note {
-      font-size: 0.9rem;
-      color: #6b7280;
-      font-style: italic;
-      margin: 6px 0 18px 0;
-      user-select: none;
-    }
-    .button-group {
-      display: flex;
-      gap: 14px;
-      margin: 20px 0 30px 0;
-      flex-wrap: wrap;
-    }
-    button {
-      background-color: #3b82f6;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      padding: 14px 26px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(59,130,246,0.3);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    button:hover {
-      background-color: #2563eb;
-      box-shadow: 0 5px 14px rgba(37, 99, 235, 0.6);
-    }
-    #btnCopy {
-      background-color: #10b981;
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-    }
-    #btnCopy:hover {
-      background-color: #059669;
-      box-shadow: 0 5px 14px rgba(5, 150, 105, 0.6);
-    }
-    button svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-    }
-    pre#output {
-      background: #1e293b;
-      color: #e0e0e0;
-      padding: 24px 28px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.95rem;
-      border-radius: 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      max-height: 260px;
-      overflow-y: auto;
-      box-shadow: inset 0 0 15px #334155;
-      user-select: text;
-    }
-    .font-size-container,
-    .language-select-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .live-preview {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 18px rgba(0,0,0,0.1);
-      padding: 18px 22px;
-      font-family: var(--preview-font, 'Yu Gothic UI', sans-serif);
-      font-size: var(--preview-font-size, 10.5pt);
-      color: #111;
-      min-height: 140px;
-      margin-top: 12px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-      user-select: text;
-      transition: font-size 0.3s ease;
-    }
-  </style>
-</head>
-<body>
-  <h1>Text Formatter for Languages and English</h1>
+    <div class="font-size-container">
+      <label for="fontSizeInput">Font size (pt):</label>
+      <input
+        type="number"
+        id="fontSizeInput"
+        min="5"
+        max="72"
+        value="10.5"
+        step="0.1"
+      />
 
-  <div class="form-group font-size-container">
-    <label for="fontSizeInput" title="Set font size in points">Font size (pt):</label>
-    <input
-      type="number"
-      id="fontSizeInput"
-      min="5"
-      max="72"
-      value="10.5"
-      step="0.1"
-      aria-describedby="fontSizeHelp"
-    />
-    <small id="fontSizeHelp" class="note">Choose a size between 11.5 and 14 pt</small>
-  </div>
+      <label for="languageSelect">Language group:</label>
+      <select id="languageSelect">
+        <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
+        <option value="'Segoe UI'">Hebrew, Armenian, Georgian</option>
+        <option value="'Segoe UI'">Arabic</option>
+        <option value="'Nirmala UI'">Indian Languages</option>
+        <option value="Leelawadee">Thai</option>
+        <option value="Gadugi">Indigenous American</option>
+        <option value="'Microsoft YaHei UI'">Chinese (Simplified)</option>
+        <option value="'Microsoft JhengHei UI'">Chinese (Traditional)</option>
+        <option value="'Malgun Gothic'">Korean</option>
+        <option value="'Yu Gothic UI'" selected>Japanese</option>
+        <option value="'Lao UI'">Lao</option>
+      </select>
 
-  <div class="form-group language-select-container">
-    <label for="languageSelect" title="Select language script for the font">Language group:</label>
-    <select id="languageSelect" aria-describedby="languageHelp" aria-label="Choose language group">
-      <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
-      <option value="'Segoe UI'">Hebrew, Armenian, Georgian</option>
-      <option value="'Segoe UI'">Arabic</option>
-      <option value="'Nirmala UI'">Indian Languages</option>
-      <option value="Leelawadee">Thai</option>
-      <option value="Gadugi">Indigenous American</option>
-      <option value="'Microsoft YaHei UI'">Chinese (Simplified)</option>
-      <option value="'Microsoft JhengHei UI'">Chinese (Traditional)</option>
-      <option value="'Malgun Gothic'">Korean</option>
-      <option value="'Yu Gothic UI'" selected>Japanese</option>
-      <option value="'Lao UI'">Lao</option>
-    </select>
-    <small id="languageHelp" class="note">Choose font for base language text</small>
-  </div>
+      <span class="note">Choose font for base language text</span>
+    </div>
 
-  <div class="form-group" style="flex-direction: column;">
     <label for="inputText">Enter your text below:</label>
-    <textarea id="inputText" placeholder="Paste or type your Japanese and English text here…"></textarea>
-    <div class="note" aria-live="polite">Supports Languages + English text spacing and formatting</div>
-  </div>
+    <textarea id="inputText" placeholder="Paste your text here…"></textarea>
+    <div class="note">
+      Supports Different Languages + English text spacing and formatting
+    </div>
 
-  <div class="button-group">
-    <button onclick="formatText()" aria-label="Format the text">Format Text
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 17h18v2H3v-2zm0-6h12v2H3v-2zm0-6h18v2H3V5z"/></svg>
-    </button>
-    <button id="btnCopy" onclick="copyOutput()" aria-label="Copy the formatted HTML code to clipboard">Copy Code
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 1H4a2 2 0 0 0-2 2v16h2V3h12V1zM19 5H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
-    </button>
-  </div>
+    <button onclick="formatText()">Format Text</button>
+    <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
 
-  <label for="output" style="font-weight: 600;">Formatted HTML Code Output:</label>
-  <pre id="output" readonly></pre>
+    <label for="output">Formatted HTML Code Output:</label>
+    <pre id="output" readonly></pre>
 
-  <label for="preview" style="font-weight: 600; margin-top: 30px; display: inline-block;">Live Preview:</label>
-  <div id="preview" class="live-preview" aria-live="polite" aria-label="Live preview of formatted text"></div>
+    <label for="nonEnglishOutput">Non-English Characters Highlighted:</label>
+    <pre id="nonEnglishOutput" readonly></pre>
 
-  <script>
-    let rawFormattedHTML = "";
+    <script>
+      let rawFormattedHTML = "";
 
-    const preview = document.getElementById('preview');
+      function escapeHTML(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
 
-    function escapeHTML(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+      function syntaxHighlight(html) {
+        let escaped = escapeHTML(html);
 
-    function syntaxHighlight(html) {
-      let escaped = escapeHTML(html);
+        escaped = escaped.replace(
+          /(&lt;\/?)([\w-]+)([^&]*?)(&gt;)/g,
+          (match, p1, tagName, attrs, p4) => {
+            let highlightedTag = `<span class="tag">${tagName}</span>`;
+            let highlightedAttrs = attrs.replace(
+              /([\w-]+)(=)("[^"]*")/g,
+              (m, attrName, eq, attrValue) =>
+                `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
+            );
+            return `${p1}<span class="punct">&lt;</span>${highlightedTag}${highlightedAttrs}<span class="punct">&gt;</span>`;
+          }
+        );
 
-      escaped = escaped.replace(
-        /(&lt;\/?)([\w-]+)([^&]*?)(&gt;)/g,
-        (match, p1, tagName, attrs, p4) => {
-          let highlightedTag = `<span class="tag">${tagName}</span>`;
-          let highlightedAttrs = attrs.replace(
-            /([\w-]+)(=)("[^"]*")/g,
-            (m, attrName, eq, attrValue) =>
-              `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
+        return escaped;
+      }
+
+      function highlightNonEnglishChars(text) {
+        // Wrap all non-ASCII characters in a styled span
+        return text.replace(/([^\x00-\x7F])/g, (match) => {
+          return `<span class="highlight-nonenglish">${match}</span>`;
+        });
+      }
+
+      function formatText() {
+        let inputText = document.getElementById("inputText").value;
+        let fontSize = document.getElementById("fontSizeInput").value.trim();
+        let languageSelect = document.getElementById("languageSelect");
+        let selectedFont = languageSelect.value;
+        let selectedText = languageSelect.selectedOptions[0].text;
+
+        if (!inputText.trim()) {
+          alert("Please enter some text to format.");
+          return;
+        }
+
+        if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
+          alert("Please enter a valid positive font size.");
+          return;
+        }
+
+        let formattedText = inputText;
+
+        const isJapanese = selectedFont === "'Yu Gothic UI'";
+        const isArabic = selectedText === "Arabic";
+
+        if (isJapanese) {
+          formattedText = formattedText
+            .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
+            .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
+
+          formattedText = formattedText.replace(
+            /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
+            (match) =>
+              `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
           );
-          return `${p1}${highlightedTag}${highlightedAttrs}${p4}`;
         }
-      );
 
-      return escaped;
-    }
+        formattedText = formattedText.replace(/\n/g, "<br>");
 
-    function formatText() {
-      let inputText = document.getElementById("inputText").value;
-      let fontSize = document.getElementById("fontSizeInput").value.trim();
-      let selectedFont = document.getElementById("languageSelect").value;
+        let wrapperTag = isJapanese ? "div" : "p";
+        let dirAttr = isArabic ? ' dir="rtl"' : "";
+        let extraStyle = isArabic ? "text-align: right;" : "";
 
-      if (!inputText.trim()) {
-        alert("Please enter some text to format.");
-        return;
-      }
-      if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
-        alert("Please enter a valid positive font size.");
-        return;
-      }
+        rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
 
-      // Add spaces between Japanese and alphanumeric characters
-      let formattedText = inputText
-        .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
-        .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
+        document.getElementById("output").innerHTML =
+          syntaxHighlight(rawFormattedHTML);
 
-      // Wrap Latin words with Segoe UI font for improved readability
-      formattedText = formattedText.replace(
-        /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
-        (match) => `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
-      );
-
-      // Replace new lines with <br> for HTML formatting
-      formattedText = formattedText.replace(/\n/g, "<br>");
-
-      rawFormattedHTML = `<div style="font-family:${selectedFont};font-size: ${fontSize}pt;">${formattedText}</div>`;
-
-      document.getElementById("output").innerHTML = syntaxHighlight(rawFormattedHTML);
-
-      // Update live preview, keep font size and family consistent
-      preview.style.setProperty('--preview-font', selectedFont);
-      preview.style.setProperty('--preview-font-size', `${fontSize}pt`);
-      preview.innerHTML = formattedText;
-    }
-
-    function copyOutput() {
-      if (!rawFormattedHTML) {
-        alert("No formatted code to copy. Please format your text first.");
-        return;
+        // Highlight and show non-English characters only
+        let highlightedNonEnglish = highlightNonEnglishChars(inputText);
+        document.getElementById("nonEnglishOutput").innerHTML =
+          highlightedNonEnglish;
       }
 
-      navigator.clipboard.writeText(rawFormattedHTML).then(
-        () => {
-          alert("Formatted HTML code copied to clipboard!");
-        },
-        () => {
-          alert("Failed to copy. Please copy manually.");
+      function copyOutput() {
+        if (!rawFormattedHTML) {
+          alert("No formatted code to copy. Please format your text first.");
+          return;
         }
-      );
-    }
-  </script>
-</body>
+
+        navigator.clipboard.writeText(rawFormattedHTML).then(
+          () => {
+            alert("Formatted HTML code copied to clipboard!");
+          },
+          () => {
+            alert("Failed to copy. Please copy manually.");
+          }
+        );
+      }
+    </script>
+  </body>
 </html>
