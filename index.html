@@ -3,183 +3,119 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Text Formatter for Japanese</title>
+    <title>Text Formatter</title>
     <style>
-      /* Base styling */
       body {
-        font-family: "Yu Gothic UI", "Segoe UI", Tahoma, Geneva, Verdana,
-          sans-serif;
-        max-width: 720px;
+        font-family: Arial, sans-serif;
+        max-width: 700px;
         margin: 40px auto;
-        padding: 30px 25px 60px;
-        background: linear-gradient(135deg, #f0f5ff 0%, #ffffff 100%);
-        color: #2c3e50;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        border-radius: 15px;
+        padding: 20px;
+        background: #f9f9f9;
+        color: #333;
       }
       h1 {
-        font-size: 2.2em;
-        margin-bottom: 0.4em;
+        font-size: 1.8em;
+        margin-bottom: 0.2em;
         text-align: center;
-        color: #34495e;
-        letter-spacing: 1.2px;
-        font-weight: 700;
-        user-select: none;
+        color: #4a4a4a;
       }
       label {
-        font-weight: 700;
-        margin-bottom: 0.5em;
+        font-weight: 600;
+        margin-bottom: 0.4em;
         display: block;
-        font-size: 1.2em;
-        color: #34495e;
+        font-size: 1.1em;
       }
       textarea {
         width: 100%;
-        font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
-        font-size: 1.1rem;
+        font-family: "Yu Gothic UI", sans-serif;
+        font-size: 1rem;
         resize: vertical;
-        min-height: 140px;
-        padding: 14px 16px;
-        border-radius: 10px;
-        border: 2px solid #d1d9e6;
+        min-height: 120px;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
         box-sizing: border-box;
-        box-shadow: inset 0 2px 5px #cfd9f7;
-        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        box-shadow: inset 0 1px 3px #ddd;
+        transition: border-color 0.3s ease;
       }
       textarea:focus {
         border-color: #4a90e2;
         outline: none;
-        box-shadow: 0 0 10px rgba(74, 144, 226, 0.6);
+        box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
       }
-      input[type="number"] {
-        width: 100px;
-        padding: 8px 12px;
-        margin-right: 15px;
-        font-size: 1.1rem;
-        border-radius: 10px;
-        border: 2px solid #d1d9e6;
+      input[type="number"],
+      select {
+        padding: 6px 10px;
+        margin: 0 10px 20px 0;
+        font-size: 1rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
         box-sizing: border-box;
-        box-shadow: inset 0 2px 5px #cfd9f7;
-        transition: border-color 0.25s ease, box-shadow 0.25s ease;
-        text-align: center;
+        box-shadow: inset 0 1px 3px #ddd;
+        transition: border-color 0.3s ease;
       }
-      input[type="number"]:focus {
+      input[type="number"]:focus,
+      select:focus {
         border-color: #4a90e2;
         outline: none;
-        box-shadow: 0 0 10px rgba(74, 144, 226, 0.6);
+        box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
       }
       .font-size-container {
-        margin-bottom: 22px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .note {
-        font-size: 0.95em;
-        color: #7f8c8d;
-        margin-top: 8px;
-        margin-bottom: 18px;
-        font-style: italic;
-        user-select: none;
+        margin-bottom: 10px;
       }
       button {
         display: inline-block;
         background-color: #4a90e2;
         color: white;
         border: none;
-        border-radius: 12px;
-        font-size: 1.2em;
-        padding: 14px 28px;
+        border-radius: 6px;
+        font-size: 1.1em;
+        padding: 12px 20px;
         cursor: pointer;
-        margin: 20px 15px 20px 0;
-        box-shadow: 0 4px 10px rgba(74, 144, 226, 0.4);
-        transition: background-color 0.35s ease, box-shadow 0.35s ease;
-        user-select: none;
+        margin: 20px 10px 20px 0;
+        transition: background-color 0.3s ease;
       }
-      button:hover,
-      button:focus {
+      button:hover {
         background-color: #3a78c2;
-        box-shadow: 0 6px 14px rgba(58, 120, 194, 0.65);
-        outline: none;
       }
       #btnCopy {
         background-color: #27ae60;
-        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.5);
       }
-      #btnCopy:hover,
-      #btnCopy:focus {
+      #btnCopy:hover {
         background-color: #1e8449;
-        box-shadow: 0 6px 14px rgba(30, 132, 73, 0.7);
       }
       pre#output {
-        background: #1e1e1e;
-        color: #d4d4d4;
-        padding: 25px 30px;
+        background: #272822;
+        color: #f8f8f2;
+        padding: 20px;
         font-family: "Courier New", Courier, monospace;
-        font-size: 1rem;
-        border-radius: 12px;
+        font-size: 0.9rem;
+        border-radius: 6px;
         white-space: pre-wrap;
         word-break: break-word;
-        max-height: 300px;
+        max-height: 250px;
         overflow-y: auto;
-        box-shadow: inset 0 0 15px #222;
-        user-select: text;
+        box-shadow: inset 0 0 10px #222;
       }
-      /* Syntax highlight improved */
       .tag {
-        color: #ff5370;
-        font-weight: 700;
+        color: #f92672;
+        font-weight: bold;
       }
       .attr {
-        color: #82aaff;
+        color: #66d9ef;
       }
       .value {
-        color: #c3e88d;
+        color: #e6db74;
       }
       .punct {
         color: #f8f8f2;
       }
-      /* Highlight Japanese text in the preview panel */
-      #highlightedTextPanel {
-        margin-top: 30px;
-        padding: 20px;
-        border-radius: 12px;
-        background-color: #d3d3d3;
-        box-shadow: 0 0 12px #d3d3d3 inset;
-        font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
-        font-size: 1.15rem;
-        color: #333;
-        white-space: pre-wrap;
-        line-height: 1.5;
-      }
-      .japanese-highlight {
-        background-color: #fff59d;
-        border-radius: 4px;
-        padding: 0 4px;
-      }
-      /* Responsive */
-      @media (max-width: 500px) {
-        body {
-          margin: 20px 15px;
-          padding: 20px 15px 40px;
-        }
-        h1 {
-          font-size: 1.8em;
-        }
-        input[type="number"] {
-          width: 60px;
-          font-size: 1rem;
-          padding: 6px 8px;
-        }
-        button {
-          font-size: 1em;
-          padding: 12px 18px;
-          margin: 15px 10px 15px 0;
-        }
-        #highlightedTextPanel {
-          font-size: 1rem;
-          padding: 15px;
-        }
+      .note {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-style: italic;
       }
     </style>
   </head>
@@ -195,52 +131,37 @@
         max="72"
         value="10.5"
         step="0.1"
-        aria-label="Font size input in points"
       />
-      <span class="note">Enter font size in points (e.g., 10.5)</span>
+
+      <label for="languageSelect">Language group:</label>
+      <select id="languageSelect">
+        <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
+        <option value="'Segoe UI'">Hebrew, Armenian, Georgian</option>
+        <option value="'Segoe UI'">Arabic</option>
+        <option value="'Nirmala UI'">Indian Languages</option>
+        <option value="Leelawadee">Thai</option>
+        <option value="Gadugi">Indigenous American</option>
+        <option value="'Microsoft YaHei UI'">Chinese (Simplified)</option>
+        <option value="'Microsoft JhengHei UI'">Chinese (Traditional)</option>
+        <option value="'Malgun Gothic'">Korean</option>
+        <option value="'Yu Gothic UI'" selected>Japanese</option>
+        <option value="'Lao UI'">Lao</option>
+      </select>
+
+      <span class="note">Choose font for base language text</span>
     </div>
 
     <label for="inputText">Enter your text below:</label>
-    <textarea
-      id="inputText"
-      placeholder="Paste your text here…"
-      aria-label="Text input area"
-    ></textarea>
+    <textarea id="inputText" placeholder="Paste your text here…"></textarea>
     <div class="note">
       Supports Japanese + English text spacing and formatting
     </div>
 
-    <button
-      type="button"
-      onclick="formatText()"
-      aria-label="Format the input text"
-    >
-      Format Text
-    </button>
-    <button
-      type="button"
-      id="btnCopy"
-      onclick="copyOutput()"
-      aria-label="Copy formatted HTML code"
-    >
-      Copy Code
-    </button>
+    <button onclick="formatText()">Format Text</button>
+    <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
 
     <label for="output">Formatted HTML Code Output:</label>
-    <pre id="output" readonly aria-live="polite" aria-atomic="true"></pre>
-
-    <label
-      for="highlightedTextPanel"
-      style="
-        margin-top: 30px;
-        display: block;
-        font-weight: 700;
-        font-size: 1.2rem;
-      "
-    >
-      Text Preview with Japanese Highlight:
-    </label>
-    <div id="highlightedTextPanel" aria-live="polite" aria-atomic="true"></div>
+    <pre id="output" readonly></pre>
 
     <script>
       let rawFormattedHTML = "";
@@ -251,12 +172,12 @@
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;")
-          .replace(/'/g, "'");
+          .replace(/'/g, "&#39;");
       }
 
-      // Syntax highlighter for output code
       function syntaxHighlight(html) {
         let escaped = escapeHTML(html);
+
         escaped = escaped.replace(
           /(&lt;\/?)([\w-]+)([^&]*?)(&gt;)/g,
           (match, p1, tagName, attrs, p4) => {
@@ -269,22 +190,14 @@
             return `${p1}${highlightedTag}${highlightedAttrs}${p4}`;
           }
         );
+
         return escaped;
       }
 
-      // Highlight Japanese text by wrapping in span with class
-      function highlightJapaneseText(text) {
-        let jpRegex = /([\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]+)/g;
-        return text.replace(
-          jpRegex,
-          (match) => `<span class="japanese-highlight">${match}</span>`
-        );
-      }
-
-      // Format text (for output panel) + show highlight panel
       function formatText() {
         let inputText = document.getElementById("inputText").value;
         let fontSize = document.getElementById("fontSizeInput").value.trim();
+        let selectedFont = document.getElementById("languageSelect").value;
 
         if (!inputText.trim()) {
           alert("Please enter some text to format.");
@@ -295,47 +208,37 @@
           return;
         }
 
-        // Step 1: Add space between Japanese and English (and numbers)
         let formattedText = inputText
           .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
           .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
 
-        // Step 2: Wrap sequences of English words and numbers in ONE <span>
         formattedText = formattedText.replace(
-          /([A-Za-z0-9 ]+)/g,
+          /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
           (match) => `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
         );
 
-        // Step 3: Add space after specific punctuation marks
-        formattedText = formattedText.replace(/([。！？、，．；：])/g, "$1 ");
 
-        // Step 4: Preserve line breaks by replacing newlines with <br>
         formattedText = formattedText.replace(/\n/g, "<br>");
 
-        // Step 5: Wrap in div with dynamic font size and Yu Gothic UI font
-        rawFormattedHTML = `<div style="font-family:'Yu Gothic UI',sans-serif;font-size: ${fontSize}pt;">${formattedText}</div>`;
+        rawFormattedHTML = `<div style="font-family:${selectedFont};font-size: ${fontSize}pt;">${formattedText}</div>`;
 
-        // Show formatted code with syntax highlighting
         document.getElementById("output").innerHTML =
           syntaxHighlight(rawFormattedHTML);
-
-        // Prepare and display full text preview with Japanese highlighting
-        let highlightedPreviewText = highlightJapaneseText(inputText);
-        // Replace new lines for HTML display
-        highlightedPreviewText = highlightedPreviewText.replace(/\n/g, "<br>");
-        document.getElementById("highlightedTextPanel").innerHTML =
-          highlightedPreviewText;
       }
 
-      // Copy formatted code to clipboard
       function copyOutput() {
         if (!rawFormattedHTML) {
           alert("No formatted code to copy. Please format your text first.");
           return;
         }
+
         navigator.clipboard.writeText(rawFormattedHTML).then(
-          () => alert("Formatted HTML code copied to clipboard!"),
-          () => alert("Failed to copy. Please copy manually.")
+          () => {
+            alert("Formatted HTML code copied to clipboard!");
+          },
+          () => {
+            alert("Failed to copy. Please copy manually.");
+          }
         );
       }
     </script>
