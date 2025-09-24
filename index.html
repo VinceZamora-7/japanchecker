@@ -1,332 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Text Formatter</title>
-    <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 24px 30px;
-        background: #f5f7fa;
-        color: #2c3e50;
-        line-height: 1.6;
-      }
-      h1 {
-        font-size: 2rem;
-        margin-bottom: 30px;
-        text-align: center;
-        color: #34495e;
-        user-select: text;
-      }
-      label {
-        font-weight: 600;
-        margin-bottom: 0.5em;
-        display: block;
-        font-size: 1.125em;
-        color: #34495e;
-        user-select: text;
-      }
-      .font-size-container {
-        background: #fff;
-        padding: 20px 25px 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
-        margin-bottom: 30px;
-      }
-      input[type="number"],
-      select {
-        font-size: 1rem;
-        padding: 8px 14px;
-        margin-right: 20px;
-        border-radius: 8px;
-        border: 1.8px solid #bdc3c7;
-        box-shadow: inset 0 2px 6px #e2e6ec;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        min-width: 130px;
-        outline-offset: 2px;
-        cursor: pointer;
-        font-family: inherit;
-      }
-      input[type="number"]:focus,
-      select:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
-        outline: none;
-      }
-      textarea {
-        width: 100%;
-        font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
-        font-size: 1rem;
-        resize: vertical;
-        min-height: 140px;
-        padding: 16px 18px;
-        border-radius: 12px;
-        border: 1.8px solid #bdc3c7;
-        box-shadow: inset 0 4px 10px #dfe4eb;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        user-select: text;
-      }
-      textarea::placeholder {
-        color: #aab8c2;
-        font-style: italic;
-      }
-      textarea:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 12px rgba(52, 152, 219, 0.5);
-        outline: none;
-      }
-      button {
-        display: inline-block;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.1em;
-        font-weight: 600;
-        padding: 14px 28px;
-        cursor: pointer;
-        margin: 25px 12px 35px 0;
-        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.35);
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        font-family: inherit;
-      }
-      button:hover {
-        background-color: #2c80cc;
-        box-shadow: 0 7px 20px rgba(44, 128, 204, 0.6);
-      }
-      #btnCopy {
-        background-color: #27ae60;
-        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.5);
-      }
-      #btnCopy:hover {
-        background-color: #1e8449;
-        box-shadow: 0 7px 20px rgba(30, 132, 73, 0.7);
-      }
-      pre#output {
-        background: #272822;
-        color: #f8f8f2;
-        padding: 22px 26px;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 0.95rem;
-        border-radius: 12px;
-        white-space: pre-wrap;
-        word-break: break-word;
-        max-height: 280px;
-        overflow-y: auto;
-        box-shadow: inset 0 0 16px #222;
-        user-select: text;
-      }
-      #nonEnglishOutput {
-        background: #eaf4fc;
-        color: #1a3d7c;
-        padding: 20px 24px;
-        font-family: "Courier New", Courier, monospace;
-        font-size: 1rem;
-        border-radius: 12px;
-        white-space: pre-wrap;
-        word-break: break-word;
-        max-height: 160px;
-        overflow-y: auto;
-        box-shadow: inset 0 0 8px #cbe0fc;
-        margin-bottom: 30px;
-        user-select: text;
-      }
-      .highlight-nonenglish {
-        background-color: #a9d1ff;
-        color: #003366;
-        font-weight: bold;
-        border-radius: 4px;
-        padding: 0 4px;
-      }
-      .tag {
-        color: #ff5370;
-        font-weight: 700;
-        text-shadow: 0 0 4px #ff3a58;
-      }
-      .attr {
-        color: #82aaff;
-        font-weight: 600;
-        text-shadow: 0 0 5px #7199ff;
-      }
-      .value {
-        color: #c3e88d;
-        font-style: normal;
-        font-weight: 600;
-        text-shadow: 0 0 4px #a7d86b;
-      }
-      .punct {
-        color: #f8f8f2;
-        font-weight: 800;
-      }
-      .note {
-        font-size: 0.9em;
-        color: #666;
-        margin-top: 10px;
-        margin-bottom: 10px;
-        font-style: italic;
-        user-select: text;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>InstaFont</h1>
-    <div class="note">
-      Disclaimer: This application only formats the appropriate font family per language and does not apply any styling such as padding, margin, positioning, color, bold, or italic, as it only accepts plain text.
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InstaFont</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 24px 30px;
+      background: #f5f7fa;
+      color: #2c3e50;
+      line-height: 1.6;
+    }
  
-    <div class="font-size-container">
-      <label for="fontSizeInput">Font size (pt):</label>
-      <input
-        type="number"
-        id="fontSizeInput"
-        min="10.5"
-        max="15"
-        value="10.5"
-        step="0.1"
-      />
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #34495e;
+    }
  
-      <label for="languageSelect">Language group:</label>
-      <select id="languageSelect">
-        <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
-        <option value="'Segoe UI'">Hebrew, Armenian, Georgian</option>
-        <option value="'Segoe UI'">Arabic</option>
-        <option value="'Nirmala UI'">Indian Languages</option>
-        <option value="Leelawadee">Thai</option>
-        <option value="Gadugi">Indigenous American</option>
-        <option value="'Microsoft YaHei UI'">Chinese (Simplified)</option>
-        <option value="'Microsoft JhengHei UI'">Chinese (Traditional)</option>
-        <option value="'Malgun Gothic'">Korean</option>
-        <option value="'Yu Gothic UI'" selected>Japanese</option>
-        <option value="'Lao UI'">Lao</option>
-      </select>
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5em;
+      display: block;
+      font-size: 1.125em;
+      color: #34495e;
+    }
  
-      <span class="note">Choose font for base language text</span>
-    </div>
+    .note {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
  
-    <label for="inputText">Enter your text below:</label>
-    <textarea id="inputText" placeholder="Paste your text here…"></textarea>
+    .font-size-container {
+      background: #fff;
+      padding: 20px 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+      margin-bottom: 30px;
+    }
  
-    <button onclick="formatText()">Format Text</button>
-    <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
+    input[type="number"],
+    select {
+      font-size: 1rem;
+      padding: 8px 14px;
+      margin-right: 20px;
+      border-radius: 8px;
+      border: 1.8px solid #bdc3c7;
+      box-shadow: inset 0 2px 6px #e2e6ec;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      min-width: 130px;
+      outline-offset: 2px;
+      cursor: pointer;
+      font-family: inherit;
+    }
  
-    <label for="output">Formatted HTML Code Output:</label>
+    input[type="number"]:focus,
+    select:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+      outline: none;
+    }
+ 
+    textarea {
+      width: 100%;
+      font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 140px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1.8px solid #bdc3c7;
+      box-shadow: inset 0 4px 10px #dfe4eb;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+ 
+    button {
+      display: inline-block;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 600;
+      padding: 14px 28px;
+      cursor: pointer;
+      margin: 25px 12px 35px 0;
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.35);
+    }
+ 
+    button:hover {
+      background-color: #2c80cc;
+    }
+ 
+    #btnCopy {
+      background-color: #27ae60;
+    }
+ 
+    #btnCopy:hover {
+      background-color: #1e8449;
+    }
+ 
+    .output-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+ 
+    #output,
+    #nonEnglishOutput {
+      min-width: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 20px 24px;
+      border-radius: 12px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 1rem;
+    }
+    .output-label {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #34495e;
+  margin-bottom: 8px;
+}
+ 
+ 
+    #output {
+      background: #272822;
+      color: #f8f8f2;
+      box-shadow: inset 0 0 16px #222;
+    }
+ 
+    #nonEnglishOutput {
+      background: #eaf4fc;
+      color: #1a3d7c;
+      box-shadow: inset 0 0 8px #cbe0fc;
+    }
+ 
+    .highlight-nonenglish {
+      background-color: #a9d1ff;
+      color: #003366;
+      font-weight: bold;
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+ 
+    .tag {
+      color: #ff5370;
+      font-weight: 700;
+      text-shadow: 0 0 4px #ff3a58;
+    }
+ 
+    .attr {
+      color: #82aaff;
+      font-weight: 600;
+      text-shadow: 0 0 5px #7199ff;
+    }
+ 
+    .value {
+      color: #c3e88d;
+      font-style: normal;
+      font-weight: 600;
+      text-shadow: 0 0 4px #a7d86b;
+    }
+ 
+    .punct {
+      color: #f8f8f2;
+      font-weight: 800;
+    }
+ 
+    @media (max-width: 700px) {
+      .output-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>InstaFont</h1>
+  <div class="note">
+    Disclaimer: This application only formats the appropriate font family per language and does not apply any styling such as padding, margin, positioning, color, bold, or italic, as it only accepts plain text.
+  </div>
+ 
+  <div class="font-size-container">
+    <label for="fontSizeInput">Font size (pt):</label>
+    <input
+      type="number"
+      id="fontSizeInput"
+      min="10.5"
+      max="15"
+      value="10.5"
+      step="0.1"
+    />
+ 
+    <label for="languageSelect">Language group:</label>
+    <select id="languageSelect">
+      <option value="'Segoe Pro'">Latin, Greek, Cyrillic</option>
+      <option value="'Segoe UI'">Hebrew, Armenian, Georgian</option>
+      <option value="'Segoe UI'">Arabic</option>
+      <option value="'Nirmala UI'">Indian Languages</option>
+      <option value="Leelawadee">Thai</option>
+      <option value="Gadugi">Indigenous American</option>
+      <option value="'Microsoft YaHei UI'">Chinese (Simplified)</option>
+      <option value="'Microsoft JhengHei UI'">Chinese (Traditional)</option>
+      <option value="'Malgun Gothic'">Korean</option>
+      <option value="'Yu Gothic UI'" selected>Japanese</option>
+      <option value="'Lao UI'">Lao</option>
+    </select>
+    <span class="note">Choose font for base language text</span>
+  </div>
+ 
+  <label for="inputText">Enter your text below:</label>
+  <textarea id="inputText" placeholder="Paste your text here…"></textarea>
+ 
+  <button onclick="formatText()">Format Text</button>
+  <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
+ 
+  <div class="output-container">
+  <div>
+    <label for="output" class="output-label">Formatted HTML Code Output</label>
     <pre id="output" readonly></pre>
- 
-    <label for="nonEnglishOutput">Non-English Characters Highlighted:</label>
+  </div>
+  <div>
+    <label for="nonEnglishOutput" class="output-label">Non-English Characters Highlighted</label>
     <pre id="nonEnglishOutput" readonly></pre>
+  </div>
+</div>
  
-    <script>
-      let rawFormattedHTML = "";
  
-      function escapeHTML(str) {
-        return str
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#39;");
-      }
+  <script>
+    let rawFormattedHTML = "";
  
-      function syntaxHighlight(html) {
-        let escaped = escapeHTML(html);
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
  
-        // Match tags with optional slash, tagName, attributes, and closing angle bracket
-        escaped = escaped.replace(
-          /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
-          (match, lt, slash, tagName, attrs, gt) => {
-            let highlightedTag = `<span class="tag">${tagName}</span>`;
-            let highlightedAttrs = attrs.replace(
-              /([\w-]+)(=)("[^"]*")/g,
-              (m, attrName, eq, attrValue) =>
-                `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
-            );
+    function syntaxHighlight(html) {
+      let escaped = escapeHTML(html);
  
-            // Wrap < and > separately; slash stays outside
-            return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
-          }
-        );
- 
-        return escaped;
-      }
- 
-      function highlightNonEnglishChars(text) {
-        // Wrap all non-ASCII characters in a styled span
-        return text.replace(/([^\x00-\x7F])/g, (match) => {
-          return `<span class="highlight-nonenglish">${match}</span>`;
-        });
-      }
- 
-      function formatText() {
-        let inputText = document.getElementById("inputText").value;
-        let fontSize = document.getElementById("fontSizeInput").value.trim();
-        let languageSelect = document.getElementById("languageSelect");
-        let selectedFont = languageSelect.value;
-        let selectedText = languageSelect.selectedOptions[0].text;
- 
-        if (!inputText.trim()) {
-          alert("Please enter some text to format.");
-          return;
-        }
- 
-        if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
-          alert("Please enter a valid positive font size.");
-          return;
-        }
- 
-        let formattedText = inputText;
- 
-        const isJapanese = selectedFont === "'Yu Gothic UI'";
-        const isArabic = selectedText === "Arabic";
- 
-        if (isJapanese) {
-          formattedText = formattedText
-            .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
-            .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
- 
-          formattedText = formattedText.replace(
-            /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
-            (match) =>
-              `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
+      escaped = escaped.replace(
+        /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
+        (match, lt, slash, tagName, attrs, gt) => {
+          let highlightedTag = `<span class="tag">${tagName}</span>`;
+          let highlightedAttrs = attrs.replace(
+            /([\w-]+)(=)("[^"]*")/g,
+            (m, attrName, eq, attrValue) =>
+              `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
           );
+          return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
         }
+      );
  
-        formattedText = formattedText.replace(/\n/g, "<br>");
+      return escaped;
+    }
  
-        let wrapperTag = isJapanese ? "div" : "p";
-        let dirAttr = isArabic ? ' dir="rtl"' : "";
-        let extraStyle = isArabic ? "text-align: right;" : "";
+    function highlightNonEnglishChars(text) {
+      return text.replace(/([^\x00-\x7F])/g, (match) => {
+        return `<span class="highlight-nonenglish">${match}</span>`;
+      });
+    }
  
-        rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
+    function formatText() {
+      let inputText = document.getElementById("inputText").value;
+      let fontSize = document.getElementById("fontSizeInput").value.trim();
+      let languageSelect = document.getElementById("languageSelect");
+      let selectedFont = languageSelect.value;
+      let selectedText = languageSelect.selectedOptions[0].text;
  
-        document.getElementById("output").innerHTML =
-          syntaxHighlight(rawFormattedHTML);
- 
-        // Highlight and show non-English characters only
-        let highlightedNonEnglish = highlightNonEnglishChars(inputText);
-        document.getElementById("nonEnglishOutput").innerHTML =
-          highlightedNonEnglish;
+      if (!inputText.trim()) {
+        alert("Please enter some text to format.");
+        return;
       }
  
-      function copyOutput() {
-        if (!rawFormattedHTML) {
-          alert("No formatted code to copy. Please format your text first.");
-          return;
-        }
+      if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
+        alert("Please enter a valid positive font size.");
+        return;
+      }
  
-        navigator.clipboard.writeText(rawFormattedHTML).then(
-          () => {
-            alert("Formatted HTML code copied to clipboard!");
-          },
-          () => {
-            alert("Failed to copy. Please copy manually.");
-          }
+      let formattedText = inputText;
+ 
+      const isJapanese = selectedFont === "'Yu Gothic UI'";
+      const isArabic = selectedText === "Arabic";
+ 
+      if (isJapanese) {
+        formattedText = formattedText
+          .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
+          .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
+ 
+        formattedText = formattedText.replace(
+          /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
+          (match) =>
+            `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
         );
       }
-    </script>
-  </body>
+ 
+      formattedText = formattedText.replace(/\n/g, "<br>");
+      let wrapperTag = isJapanese ? "div" : "p";
+      let dirAttr = isArabic ? ' dir="rtl"' : "";
+      let extraStyle = isArabic ? "text-align: right;" : "";
+ 
+      rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
+ 
+      document.getElementById("output").innerHTML = syntaxHighlight(rawFormattedHTML);
+      document.getElementById("nonEnglishOutput").innerHTML = highlightNonEnglishChars(inputText);
+    }
+ 
+    function copyOutput() {
+      if (!rawFormattedHTML) {
+        alert("No formatted code to copy. Please format your text first.");
+        return;
+      }
+ 
+      navigator.clipboard.writeText(rawFormattedHTML).then(
+        () => {
+          alert("Formatted HTML code copied to clipboard!");
+        },
+        () => {
+          alert("Failed to copy. Please copy manually.");
+        }
+      );
+    }
+  </script>
+</body>
 </html>
  
  
