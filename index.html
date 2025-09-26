@@ -146,6 +146,7 @@
       background: #eaf4fc;
       color: #1a3d7c;
       box-shadow: inset 0 0 8px #cbe0fc;
+      position: relative; /* for tooltip positioning */
     }
  
     .highlight-nonenglish {
@@ -180,11 +181,65 @@
       font-weight: 800;
     }
  
-    @media (max-width: 700px) {
-      .output-container {
-        grid-template-columns: 1fr;
-      }
+    /* Tooltip styles for character spans */
+    .char-span {
+      position: relative;
+      cursor: help;
+      white-space: pre; /* preserve spaces */
     }
+    .char-span .tooltip {
+      position: absolute;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #222d48;
+      color: #f0f0f0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+      max-width: 300px;
+      word-break: normal;
+    }
+    .char-span:hover .tooltip,
+    .char-span:focus .tooltip {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .char-span .tooltip::after {
+      content: "";
+      position: absolute;
+      border-width: 6px;
+      border-style: solid;
+      border-color: #222d48 transparent transparent transparent;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .preview-wrapper {
+  width: 660px;
+  padding: 0 24px;
+  margin: 0 auto 50px;
+  box-sizing: border-box;
+}
+ 
+#previewArea {
+  border: 1.5px solid #ccc;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  overflow-x: auto;
+}
+ 
   </style>
 </head>
 <body>
@@ -211,7 +266,7 @@
       <option value="'Yu Gothic UI'" selected>Japanese</option>
       <option value="'Lao UI'">Lao</option>
     </select>
-    <span class="note">Choose font for base language text</span>
+    <span class="note">Choose language for corresponding font style</span>
   </div>
  
   <label for="inputText">Enter your text below:</label>
@@ -230,11 +285,14 @@
       <pre id="nonEnglishOutput" readonly></pre>
     </div>
   </div>
+  <div class="preview-wrapper">
+    <label class="output-label">Preview Email</label>
+    <div id="previewArea"></div>
+  </div>
  
   <script>
     let rawFormattedHTML = "";
  
-    // Escapes special HTML characters to prevent rendering issues or code injection.
     function escapeHTML(str) {
       return str
         .replace(/&/g, "&amp;")
@@ -244,43 +302,54 @@
         .replace(/'/g, "&#39;");
     }
  
-    // Adds syntax highlighting to HTML code for display by wrapping tags and attributes in spans.
     function syntaxHighlight(html) {
-  // First escape the entire string
-  let escaped = escapeHTML(html);
+      let escaped = escapeHTML(html);
  
-  // Then replace tags with spans — note that < and > are escaped to &lt; and &gt;
-  // So replace them in escaped text.
-  escaped = escaped.replace(
-    /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
-    (match, lt, slash, tagName, attrs, gt) => {
-      // Highlight tag name
-      let highlightedTag = `<span class="tag">${tagName}</span>`;
- 
-      // Highlight attributes inside the tag, which are still escaped
-      let highlightedAttrs = attrs.replace(
-        /([\w-]+)(=)(&quot;[^&]*&quot;)/g,
-        (m, attrName, eq, attrValue) =>
-          `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
+      escaped = escaped.replace(
+        /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
+        (match, lt, slash, tagName, attrs, gt) => {
+          let highlightedTag = `<span class="tag">${tagName}</span>`;
+          let highlightedAttrs = attrs.replace(
+            /([\w-]+)(=)(&quot;[^&]*?&quot;)/g,
+            (m, attrName, eq, attrValue) =>
+              `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
+          );
+          return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
+        }
       );
  
-      // Put it all back together, but preserve escaped < and > using &lt; and &gt;
-      return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
-    }
-  );
+      // ✅ Add visual newline before each <span> in output preview
+      escaped = escaped.replace(/(&lt;span[^&]*?&gt;)/g, "\n$1");
  
-  return escaped;
-}
- 
- 
-    // Highlights non-ASCII (non-English) characters by wrapping them in a span for visual emphasis.
-    function highlightNonEnglishChars(text) {
-      return text.replace(/([^\x00-\x7F])/g, (match) => {
-        return `<span class="highlight-nonenglish">${match}</span>`;
-      });
+      return escaped;
     }
  
-    // Main function to format the input text based on language and font size selection.
+    function highlightNonEnglishChars(text, selectedFont) {
+      // For tooltip: English characters use 'Segoe UI', non-English use selectedFont
+      // Wrap every character in a span.char-span with tooltip showing font and font size
+ 
+      // Get current font size from input
+      const fontSizeInput = document.getElementById("fontSizeInput");
+      const fontSize = fontSizeInput ? fontSizeInput.value.trim() : "10.5";
+ 
+      // Split text into array of characters
+      const chars = [...text];
+ 
+      // Build HTML with spans and tooltips
+      return chars.map(char => {
+        const isNonEnglish = /[^\x00-\x7F]/.test(char);
+        const fontFamily = isNonEnglish ? selectedFont : "'Segoe UI'";
+        const highlightClass = isNonEnglish ? "highlight-nonenglish" : "";
+        // Escape char for HTML
+        const escapedChar = char === ' ' ? '\u00A0' : escapeHTML(char);
+ 
+        // Tooltip content text
+        const tooltipText = `Font: ${fontFamily.replace(/'/g, "")}, Size: ${fontSize}pt`;
+ 
+        return `<span class="char-span ${highlightClass}" tabindex="0" style="font-family:${fontFamily}">${escapedChar}<span class="tooltip">${tooltipText}</span></span>`;
+      }).join('');
+    }
+ 
     function formatText() {
       let inputText = document.getElementById("inputText").value;
       let fontSize = document.getElementById("fontSizeInput").value.trim();
@@ -306,7 +375,6 @@
         const japanesePunctuation = '～\\-\\/\\?\\!#、＜＞。「」';
         const punctuationRegex = new RegExp(`[${japanesePunctuation}]`);
  
-        // Insert space between Japanese and ASCII characters except for punctuation
         formattedText = formattedText
           .replace(/([^\x00-\x7F])([A-Za-z0-9])/g, (match, jpChar, asciiChar) => {
             return punctuationRegex.test(jpChar) ? match : `${jpChar} ${asciiChar}`;
@@ -315,15 +383,13 @@
             return punctuationRegex.test(jpChar) ? match : `${asciiChar} ${jpChar}`;
           });
  
-        // Wrap ASCII sequences in fallback font span
         formattedText = formattedText.replace(
-          /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
+          /([A-Za-z0-9]+)/g,
           (match) =>
             `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
         );
       }
  
-      // Replace line breaks with <br> tags
       formattedText = formattedText.replace(/\n/g, "<br>");
       let wrapperTag = isJapanese ? "div" : "p";
       let dirAttr = isArabic ? ' dir="rtl"' : "";
@@ -332,17 +398,23 @@
       rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
  
       document.getElementById("output").innerHTML = syntaxHighlight(rawFormattedHTML);
-      document.getElementById("nonEnglishOutput").innerHTML = highlightNonEnglishChars(inputText);
+document.getElementById("nonEnglishOutput").innerHTML = highlightNonEnglishChars(inputText, selectedFont);
+ 
+// New: Render to live preview
+document.getElementById("previewArea").innerHTML = rawFormattedHTML;
+ 
     }
  
-    // Copies the formatted HTML code to clipboard, with user feedback alerts.
     function copyOutput() {
       if (!rawFormattedHTML) {
         alert("No formatted code to copy. Please format your text first.");
         return;
       }
  
-      navigator.clipboard.writeText(rawFormattedHTML).then(
+      // ✅ Insert newline before each <span> for better readability
+      const formattedForCopy = rawFormattedHTML.replace(/<span/g, "\n<span");
+ 
+      navigator.clipboard.writeText(formattedForCopy).then(
         () => {
           alert("Formatted HTML code copied to clipboard!");
         },
@@ -352,8 +424,8 @@
       );
     }
   </script>
-</body>
  
+</body>
 </html>
  
  
