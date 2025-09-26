@@ -127,14 +127,14 @@
       font-family: "Courier New", Courier, monospace;
       font-size: 1rem;
     }
-    .output-label {
-  display: block;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: #34495e;
-  margin-bottom: 8px;
-}
  
+    .output-label {
+      display: block;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #34495e;
+      margin-bottom: 8px;
+    }
  
     #output {
       background: #272822;
@@ -190,19 +190,12 @@
 <body>
   <h1>InstaFont</h1>
   <div class="note">
-    Disclaimer: This application only formats the appropriate font family per language and does not apply any styling such as padding, margin, positioning, color, bold, or italic, as it only accepts plain text.
+    Disclaimer: This application only formats the appropriate font family per language and does not apply any styling such as padding, margin, positioning, color, bold, or italic, as it only accepts plain text. Future developments will be implemented.
   </div>
  
   <div class="font-size-container">
     <label for="fontSizeInput">Font size (pt):</label>
-    <input
-      type="number"
-      id="fontSizeInput"
-      min="10.5"
-      max="15"
-      value="10.5"
-      step="0.1"
-    />
+    <input type="number" id="fontSizeInput" min="10.5" max="15" value="10.5" step="0.1" />
  
     <label for="languageSelect">Language group:</label>
     <select id="languageSelect">
@@ -228,20 +221,20 @@
   <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
  
   <div class="output-container">
-  <div>
-    <label for="output" class="output-label">Formatted HTML Code Output</label>
-    <pre id="output" readonly></pre>
+    <div>
+      <label for="output" class="output-label">Formatted HTML Code Output</label>
+      <pre id="output" readonly></pre>
+    </div>
+    <div>
+      <label for="nonEnglishOutput" class="output-label">Non-English Characters Highlighted</label>
+      <pre id="nonEnglishOutput" readonly></pre>
+    </div>
   </div>
-  <div>
-    <label for="nonEnglishOutput" class="output-label">Non-English Characters Highlighted</label>
-    <pre id="nonEnglishOutput" readonly></pre>
-  </div>
-</div>
- 
  
   <script>
     let rawFormattedHTML = "";
  
+    // Escapes special HTML characters to prevent rendering issues or code injection.
     function escapeHTML(str) {
       return str
         .replace(/&/g, "&amp;")
@@ -251,31 +244,43 @@
         .replace(/'/g, "&#39;");
     }
  
+    // Adds syntax highlighting to HTML code for display by wrapping tags and attributes in spans.
     function syntaxHighlight(html) {
-      let escaped = escapeHTML(html);
+  // First escape the entire string
+  let escaped = escapeHTML(html);
  
-      escaped = escaped.replace(
-        /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
-        (match, lt, slash, tagName, attrs, gt) => {
-          let highlightedTag = `<span class="tag">${tagName}</span>`;
-          let highlightedAttrs = attrs.replace(
-            /([\w-]+)(=)("[^"]*")/g,
-            (m, attrName, eq, attrValue) =>
-              `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
-          );
-          return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
-        }
+  // Then replace tags with spans — note that < and > are escaped to &lt; and &gt;
+  // So replace them in escaped text.
+  escaped = escaped.replace(
+    /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
+    (match, lt, slash, tagName, attrs, gt) => {
+      // Highlight tag name
+      let highlightedTag = `<span class="tag">${tagName}</span>`;
+ 
+      // Highlight attributes inside the tag, which are still escaped
+      let highlightedAttrs = attrs.replace(
+        /([\w-]+)(=)(&quot;[^&]*&quot;)/g,
+        (m, attrName, eq, attrValue) =>
+          `<span class="attr">${attrName}</span><span class="punct">${eq}</span><span class="value">${attrValue}</span>`
       );
  
-      return escaped;
+      // Put it all back together, but preserve escaped < and > using &lt; and &gt;
+      return `<span class="punct">${lt}</span>${slash}${highlightedTag}${highlightedAttrs}<span class="punct">${gt}</span>`;
     }
+  );
  
+  return escaped;
+}
+ 
+ 
+    // Highlights non-ASCII (non-English) characters by wrapping them in a span for visual emphasis.
     function highlightNonEnglishChars(text) {
       return text.replace(/([^\x00-\x7F])/g, (match) => {
         return `<span class="highlight-nonenglish">${match}</span>`;
       });
     }
  
+    // Main function to format the input text based on language and font size selection.
     function formatText() {
       let inputText = document.getElementById("inputText").value;
       let fontSize = document.getElementById("fontSizeInput").value.trim();
@@ -294,15 +299,23 @@
       }
  
       let formattedText = inputText;
- 
       const isJapanese = selectedFont === "'Yu Gothic UI'";
       const isArabic = selectedText === "Arabic";
  
       if (isJapanese) {
-        formattedText = formattedText
-          .replace(/([^\x00-\x7F]+)([A-Za-z0-9])/g, "$1 $2")
-          .replace(/([A-Za-z0-9])([^\x00-\x7F]+)/g, "$1 $2");
+        const japanesePunctuation = '～\\-\\/\\?\\!#、＜＞。「」';
+        const punctuationRegex = new RegExp(`[${japanesePunctuation}]`);
  
+        // Insert space between Japanese and ASCII characters except for punctuation
+        formattedText = formattedText
+          .replace(/([^\x00-\x7F])([A-Za-z0-9])/g, (match, jpChar, asciiChar) => {
+            return punctuationRegex.test(jpChar) ? match : `${jpChar} ${asciiChar}`;
+          })
+          .replace(/([A-Za-z0-9])([^\x00-\x7F])/g, (match, asciiChar, jpChar) => {
+            return punctuationRegex.test(jpChar) ? match : `${asciiChar} ${jpChar}`;
+          });
+ 
+        // Wrap ASCII sequences in fallback font span
         formattedText = formattedText.replace(
           /\b([A-Za-z0-9]+(?: [A-Za-z0-9]+)*)\b/g,
           (match) =>
@@ -310,6 +323,7 @@
         );
       }
  
+      // Replace line breaks with <br> tags
       formattedText = formattedText.replace(/\n/g, "<br>");
       let wrapperTag = isJapanese ? "div" : "p";
       let dirAttr = isArabic ? ' dir="rtl"' : "";
@@ -321,6 +335,7 @@
       document.getElementById("nonEnglishOutput").innerHTML = highlightNonEnglishChars(inputText);
     }
  
+    // Copies the formatted HTML code to clipboard, with user feedback alerts.
     function copyOutput() {
       if (!rawFormattedHTML) {
         alert("No formatted code to copy. Please format your text first.");
@@ -338,6 +353,7 @@
     }
   </script>
 </body>
+ 
 </html>
  
  
