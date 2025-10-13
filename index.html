@@ -252,8 +252,8 @@
           .map(s => s.trim())
           .filter(s => s && !s.toLowerCase().startsWith('color:') && !s.toLowerCase().startsWith('text-decoration:'))
           .join('; ');
-        link.setAttribute('style', `${cleanedStyle}; color: #0067B8; text-decoration: underline`.trim());
-        link.classList.add('target_black');
+        link.setAttribute('style', `${cleanedStyle} color: #0067B8; text-decoration: underline`.trim());
+        link.setAttribute('target', '_black');
       });
 
       let updatedContent = doc.body.innerHTML;
