@@ -253,7 +253,7 @@
           .filter(s => s && !s.toLowerCase().startsWith('color:') && !s.toLowerCase().startsWith('text-decoration:'))
           .join('; ');
         link.setAttribute('style', `${cleanedStyle} color: #0067B8; text-decoration: underline`.trim());
-        link.setAttribute('target', '_black');
+        link.setAttribute('target', '_blank');
       });
 
       let updatedContent = doc.body.innerHTML;
