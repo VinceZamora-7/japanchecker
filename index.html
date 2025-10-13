@@ -274,15 +274,13 @@ function renderOutput() {
     link.style.color = '#0067B8';
  
     const styleAttr = link.getAttribute('style') || '';
-  const cleanedStyle = styleAttr
-  .split(';')
-  .map(s => s.trim())
-  .filter(s => s && !s.toLowerCase().startsWith('color:'))
-  .filter(s => s && !s.toLowerCase().startsWith('text-decoration:'))
-  .join('; ');
-link.setAttribute('style', `${cleanedStyle}; color: #0067B8; text-decoration: underline`.trim());
-link.classList.add('target_black');
-
+    const cleanedStyle = styleAttr
+      .split(';')
+      .map(s => s.trim())
+      .filter(s => s && !s.toLowerCase().startsWith('color:'))
+      .join('; ');
+    link.setAttribute('style', `${cleanedStyle}; color: #0067B8`.trim());
+  });
  
   let updatedContent = doc.body.innerHTML;
  
