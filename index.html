@@ -394,7 +394,8 @@
           // 1. Insert spaces between Japanese characters and English/ASCII characters
           // Match: Japanese character followed by ASCII character (and no space between)
           formattedText = formattedText.replace(
-            /([^\x00-\x7F\r\n\s])([A-Za-z0-9])/g,
+            // The first group now excludes common Japanese punctuation: 。、・「」
+            /([^-\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF1B\uFF1A])([A-Za-z0-9])/g,
             (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
           );
 
