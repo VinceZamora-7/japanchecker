@@ -392,39 +392,49 @@
         if (isJapanese) {
           // ---
           // JAPANESE (Han-Ei separation) Logic
-          // This logic ensures a half-width space is placed between Japanese (non-ASCII) and English (ASCII) characters.
+          // This logic inserts a half-width space between Japanese words/phrases and English/numeric text,
+          // but avoids inserting spaces around punctuation symbols that already handle kerning/spacing.
 
-          // Non-ASCII (Japanese) characters are everything *outside* the basic Latin range (U+0000 to U+007F),
-          // including CJK Unified Ideographs, Hiragana, Katakana, and full-width punctuation.
-          const JAPANESE_CHAR = "[^\\x00-\\x7F\\r\\n\\s]";
-          // ASCII characters are everything *inside* the basic Latin range.
-          const ASCII_CHAR = "[\\x00-\\x7F]";
-          // Line breaks and spaces are excluded from the main regex groups to avoid adding spaces around them.
-          // Full-width characters that *should* be excluded from the split for better flow
-          // (e.g., Japanese punctuation like 。、) are inherently non-ASCII and handled by the general logic.
+          // Common ASCII punctuation/symbols that should NOT have a space added next to them when bordering Japanese text.
+          const ASCII_PUNCTUATION =
+            "[\\.\\,\\!\\?\\:\\;\\-\\/\\(\\)[\\]\\{\\}\\<\\>]";
 
-          // 1. Insert space between a Japanese character and a following ASCII character
-          // e.g., こんにちはWorld -> こんにちは World
+          // Non-ASCII (Japanese) punctuation/symbols which already provide appropriate kerning/spacing.
+          // Includes full-width and specific Japanese symbols (e.g., 。、「」～…！？」）
+          const JAPANESE_PUNCTUATION_SYMBOLS =
+            "[\\u3000-\\u3002\\u300C-\\u300F\\u301D\\u301F\\uFE30-\\uFE44\\uFF01\\uFF09\\uFF0A\\uFF0C\\uFF0E\\uFF1F\\uFF3D\\uFF3E\\uFF5C\\uFF5E-\\uFF60\\u2026\\u2014\\u25EF]";
+
+          // Define the core character sets for spacing rules using negative lookahead:
+
+          // Japanese characters (Kanji, Hiragana, Katakana) excluding punctuation.
+          // This is a complex pattern that matches any non-ASCII char, provided it's NOT in the list of symbols.
+          const JAPANESE_CORE_CHAR = `(?![${JAPANESE_PUNCTUATION_SYMBOLS}])([^\\x00-\\x7F\\r\\n\\s])`;
+
+          // ASCII characters (letters, numbers) excluding common punctuation and also excluding spaces/newlines from the match group.
+          const ASCII_CORE_CHAR = `(?![${ASCII_PUNCTUATION}])([\\w])`;
+
+          // Original comprehensive non-ASCII regex, used only for the splitting part (step 3).
+          const JAPANESE_CHAR_FOR_SPLIT = "[^\\x00-\\x7F\\r\\n]+";
+
+          // 1. Insert space between a NON-PUNCTUATION Japanese character and a following ASCII CORE character (letter/number)
+          // e.g., 寿司World -> 寿司 World
           formattedText = formattedText.replace(
-            new RegExp(`(${JAPANESE_CHAR})(${ASCII_CHAR})`, "g"),
+            new RegExp(`(${JAPANESE_CORE_CHAR})(${ASCII_CORE_CHAR})`, "g"),
             (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
           );
 
-          // 2. Insert space between an ASCII character and a following Japanese character
+          // 2. Insert space between an ASCII CORE character (letter/number) and a following NON-PUNCTUATION Japanese character
           // e.g., Hello世界 -> Hello 世界
           formattedText = formattedText.replace(
-            new RegExp(`(${ASCII_CHAR})(${JAPANESE_CHAR})`, "g"),
+            new RegExp(`(${ASCII_CORE_CHAR})(${JAPANESE_CORE_CHAR})`, "g"),
             (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
           );
 
           // ---
           // 3. Wrap only ASCII/English chunks in an explicit Segoe UI span
-
-          // Regex to split: The capture group `(${JAPANESE_CHAR}+)` catches *runs* of non-ASCII (Japanese) characters
-          // and includes them in the resulting array. Everything *not* matched by this (which will be
-          // runs of ASCII/English, including spaces and newlines) will also be in the array.
+          // We use the comprehensive non-ASCII definition here to capture ALL non-English text for splitting.
           const splitByLanguage = formattedText.split(
-            new RegExp(`(${JAPANESE_CHAR}+)`, "g")
+            new RegExp(`(${JAPANESE_CHAR_FOR_SPLIT})`, "g")
           );
 
           formattedText = splitByLanguage
@@ -434,7 +444,6 @@
               // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
               if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
                 // This is an English/ASCII chunk. Wrap the whole chunk in one span with Segoe UI.
-                // The `sans-serif` fallback is crucial for email compatibility.
                 return `<span style="font-family: 'Segoe UI', sans-serif;">${chunk}</span>`;
               } else {
                 // Japanese or non-English chunk (already has the right font from the parent).
@@ -443,7 +452,6 @@
             })
             .join("");
         }
-
         // Convert remaining newlines to <br> tags. Using <br /> for maximum email compatibility.
         formattedText = formattedText.replace(/\n/g, "<br />");
 
