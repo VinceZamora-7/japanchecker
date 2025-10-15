@@ -304,8 +304,15 @@
     </div>
 
     <script>
+      // --- JAVASCRIPT CODE START ---
+
       let rawFormattedHTML = "";
 
+      /**
+       * Escapes special characters in a string to be safely displayed as HTML.
+       * @param {string} str - The unescaped string.
+       * @returns {string} The HTML-escaped string.
+       */
       function escapeHTML(str) {
         return str
           .replace(/&/g, "&amp;")
@@ -315,9 +322,15 @@
           .replace(/'/g, "&#39;");
       }
 
+      /**
+       * Applies syntax highlighting styles to the HTML output for display.
+       * @param {string} html - The raw HTML string.
+       * @returns {string} The HTML with syntax highlighting spans.
+       */
       function syntaxHighlight(html) {
         let escaped = escapeHTML(html);
 
+        // Highlight HTML tags, attributes, and values
         escaped = escaped.replace(
           /(&lt;)(\/?)([\w-]+)([^&]*?)(&gt;)/g,
           (match, lt, slash, tagName, attrs, gt) => {
@@ -331,44 +344,44 @@
           }
         );
 
-        // Add visual newline before each <span> for better readability
+        // Insert visual newline before each <span> for better readability
         escaped = escaped.replace(/(&lt;span[^&]*?&gt;)/g, "\n$1");
 
         return escaped;
       }
 
+      /**
+       * Wraps each character in a span with font/size information for preview/tooltip.
+       * Non-ASCII characters are highlighted.
+       * @param {string} text - The input text.
+       * @param {string} selectedFont - The selected font family for non-ASCII characters.
+       * @returns {string} The HTML string with character spans and tooltips.
+       */
       function highlightNonEnglishChars(text, selectedFont) {
-        // For tooltip: English characters use 'Segoe UI', non-English use selectedFont
-        // Get current font size from input
-        const fontSizeInput = document.getElementById("fontSizeInput");
-        const fontSize = fontSizeInput ? fontSizeInput.value.trim() : "10.5";
-
-        // Split text into array of characters
+        const fontSize =
+          document.getElementById("fontSizeInput")?.value.trim() || "10.5";
         const chars = [...text];
 
-        // Build HTML with spans and tooltips
         return chars
           .map((char) => {
-            // Check for non-ASCII characters (generally non-English)
             const isNonEnglish = /[^\x00-\x7F]/.test(char);
-            // Set font-family based on character type
             const fontFamily = isNonEnglish ? selectedFont : "'Segoe UI'";
             const highlightClass = isNonEnglish ? "highlight-nonenglish" : "";
-            // Escape char for HTML, use non-breaking space for spaces
+            // Use non-breaking space for spaces
             const escapedChar = char === " " ? "\u00A0" : escapeHTML(char);
-
-            // Tooltip content text
             const tooltipText = `Font: ${fontFamily.replace(
               /'/g,
               ""
             )}, Size: ${fontSize}pt`;
 
-            // Apply font-family style directly to the span for the preview area
             return `<span class="char-span ${highlightClass}" tabindex="0" style="font-family:${fontFamily}">${escapedChar}<span class="tooltip">${tooltipText}</span></span>`;
           })
           .join("");
       }
 
+      /**
+       * Main function to format text, apply font rules, generate HTML, and update outputs.
+       */
       function formatText() {
         let inputText = document.getElementById("inputText").value;
         let fontSize = document.getElementById("fontSizeInput").value.trim();
@@ -376,11 +389,11 @@
         let selectedFont = languageSelect.value;
         let selectedText = languageSelect.selectedOptions[0].text;
 
+        // --- Input Validation ---
         if (!inputText.trim()) {
           alert("Please enter some text to format.");
           return;
         }
-
         if (!fontSize || isNaN(fontSize) || fontSize <= 0) {
           alert("Please enter a valid positive font size.");
           return;
@@ -390,90 +403,83 @@
         const isJapanese = selectedFont === "'Yu Gothic UI'";
         const isArabic = selectedText === "Arabic";
 
-       if (isJapanese) {
-    // 1. Insert spaces between Japanese characters and English/ASCII characters
+        // --- JAPANESE TYPOGRAPHY RULES ---
+        if (isJapanese) {
+          // Unicode ranges for common Japanese/Full-width punctuation and symbols to EXCLUDE from auto-spacing.
+          const EXCLUDED_CHARS_REGEX =
+            "[\\u3000-\\u3002\\u300C\\u300D\\uFF0C\\uFF0E\\uFF1B\\uFF1A\\uFF5E\\u2014\\u2026\\uFF01\\uFF1F\\uFF1C\\uFF1E\\uFF08\\uFF09\\uFF3B\\uFF3D\\uFF5B\\uFF5D\\u3010\\u3011\\uFF0F\\uFF0D]";
+          const ASCII_ALPHANUM = "[A-Za-z0-9]";
 
-    // Regex Explanation:
-    // [^\x00-\x7F] : Matches any non-ASCII character (typically Japanese script).
-    // [\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A] : A set of common Japanese/Full-width punctuation
-    // (\x00-\x7F are ASCII)
+          // 1. Insert spaces between Japanese characters and English/ASCII alphanumerics
 
-    // The logic error was in the first replacement's character group, which was overly complex.
-    // The key is to:
-    // - Group 1: Match a Japanese character that is NOT one of the specified punctuation marks.
-    // - Group 2: Match an ASCII character (A-Z, a-z, 0-9).
+          // Match 1: Japanese character (excluding symbols) followed by ASCII Alphanumeric
+          formattedText = formattedText.replace(
+            new RegExp(
+              `([^\\x00-\\x7F\\r\\n\\s${EXCLUDED_CHARS_REGEX}])${ASCII_ALPHANUM}`,
+              "g"
+            ),
+            (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
+          );
 
-    // Match: Japanese character (excluding specific punctuation) followed by ASCII character (A-Z, a-z, 0-9)
-    formattedText = formattedText.replace(
-        /([^\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A])([A-Za-z0-9])/g,
-        (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
-    );
+          // Match 2: ASCII Alphanumeric followed by Japanese character (excluding symbols)
+          formattedText = formattedText.replace(
+            new RegExp(
+              `(${ASCII_ALPHANUM})([^\\x00-\\x7F\\r\\n\\s${EXCLUDED_CHARS_REGEX}]|[\\/\\-\\?\\!\\#\\<\\>])`,
+              "g"
+            ),
+            (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
+          );
 
-    // Match: ASCII character (A-Z, a-z, 0-9) followed by Japanese character (excluding specific punctuation)
-    // The second replacement in the original code was adding a space after *every* ASCII character followed by a non-ASCII character,
-    // even if the non-ASCII character was Japanese punctuation (like 。、).
-    // The fix is to exclude the Japanese punctuation from the second group as well.
-    formattedText = formattedText.replace(
-        /([A-Za-z0-9])([^\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A])/g,
-        (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
-    );
+          // 2. Wrap ASCII/English chunks in an explicit 'Segoe UI' span
 
-    // ---
-    // 2. Wrap only ASCII/English chunks in an explicit Segoe UI span
+          // Split by non-ASCII runs (which are kept in the array)
+          const splitByLanguage = formattedText.split(/([^\x00-\x7F\r\n]+)/g);
 
-    // Regex to split: ([^\x00-\x7F\r\n]+) catches non-ASCII (Japanese) runs and includes them in the array.
-    // The remaining chunks are ASCII/English (including the newly added spaces and other ASCII punctuation).
-    const splitByLanguage = formattedText.split(/([^\x00-\x7F\r\n]+)/g);
+          formattedText = splitByLanguage
+            .map((chunk) => {
+              if (!chunk) return "";
 
-    formattedText = splitByLanguage
-        .map((chunk) => {
-            if (!chunk) return ""; // Skip empty strings from the split
-
-            // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
-            // The original logic here was already correct: check if the chunk only contains ASCII characters.
-            if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
-                // This is an English/ASCII chunk, wrap whole chunk in one span with Segoe UI
-                // Note: It's good practice to enclose font names with spaces in quotes.
+              // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
+              if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
+                // Wrap English/ASCII chunk in a span
                 return `<span style="font-family: 'Segoe UI', sans-serif;">${chunk}</span>`;
-            } else {
-                // Japanese or non-English chunk, return as is (it will inherit the intended Japanese font from the parent)
+              } else {
+                // Japanese chunk, return as is (inherits Yu Gothic UI from parent)
                 return chunk;
-            }
-        })
-        .join("");
-}
+              }
+            })
+            .join("");
+        }
 
-        // Convert remaining newlines to <br> tags. Using <br /> for maximum email compatibility.
+        // Convert remaining newlines to <br /> tags for email compatibility
         formattedText = formattedText.replace(/\n/g, "<br />");
 
-        // Determine the outer wrapper tag and attributes
-        let wrapperTag = isJapanese ? "div" : "p";
-        let dirAttr = isArabic ? ' dir="rtl"' : "";
-        let extraStyle = isArabic ? "text-align: right;" : "";
+        // --- HTML WRAPPER CONSTRUCTION ---
+        const wrapperTag = isJapanese ? "div" : "p";
+        const dirAttr = isArabic ? ' dir="rtl"' : "";
+        const extraStyle = isArabic ? "text-align: right;" : "";
 
-        // Construct the final HTML for the email
-        // The parent element sets the default language font, and ASCII chunks override it.
+        // The parent element sets the default language font, and ASCII chunks override it with spans.
         rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
 
-        // Display the highlighted HTML code
+        // --- DISPLAY OUTPUTS ---
         document.getElementById("output").innerHTML =
           syntaxHighlight(rawFormattedHTML);
-
-        // Display the non-English character preview
         document.getElementById("nonEnglishOutput").innerHTML =
           highlightNonEnglishChars(inputText, selectedFont);
-
-        // Render to live preview
         document.getElementById("previewArea").innerHTML = rawFormattedHTML;
       }
 
+      /**
+       * Copies the raw formatted HTML code to the user's clipboard.
+       */
       function copyOutput() {
         if (!rawFormattedHTML) {
           alert("No formatted code to copy. Please format your text first.");
           return;
         }
 
-        // Insert newline before each <span> for better readability
+        // Insert newline before each <span> for better readability when copying
         const formattedForCopy = rawFormattedHTML.replace(/<span/g, "\n<span");
 
         navigator.clipboard.writeText(formattedForCopy).then(
@@ -485,6 +491,8 @@
           }
         );
       }
+
+      // --- JAVASCRIPT CODE END ---
     </script>
   </body>
 </html>
