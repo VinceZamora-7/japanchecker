@@ -390,41 +390,58 @@
         const isJapanese = selectedFont === "'Yu Gothic UI'";
         const isArabic = selectedText === "Arabic";
 
-        if (isJapanese) {
-          // 1. Insert spaces between Japanese characters and English/ASCII characters
-          // Match: Japanese character followed by ASCII character (and no space between)
-          formattedText = formattedText.replace(
-            // The first group now excludes common Japanese punctuation: 。、・「」
-            /([^-\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF1B\uFF1A])([A-Za-z0-9])/g,
-            (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
-          );
+       if (isJapanese) {
+    // 1. Insert spaces between Japanese characters and English/ASCII characters
 
-          // Match: ASCII character followed by Japanese character (and no space between)
-          formattedText = formattedText.replace(
-            /([A-Za-z0-9])([^\x00-\x7F\r\n\s])/g,
-            (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
-          );
+    // Regex Explanation:
+    // [^\x00-\x7F] : Matches any non-ASCII character (typically Japanese script).
+    // [\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A] : A set of common Japanese/Full-width punctuation
+    // (\x00-\x7F are ASCII)
 
-          // 2. Wrap only ASCII/English chunks in an explicit Segoe UI span
-          // Regex to split: ([^\x00-\x7F\r\n]+) catches non-ASCII (Japanese) runs and includes them in the array.
-          // The remaining chunks are ASCII/English (including the newly added spaces)
-          const splitByLanguage = formattedText.split(/([^\x00-\x7F\r\n]+)/g);
+    // The logic error was in the first replacement's character group, which was overly complex.
+    // The key is to:
+    // - Group 1: Match a Japanese character that is NOT one of the specified punctuation marks.
+    // - Group 2: Match an ASCII character (A-Z, a-z, 0-9).
 
-          formattedText = splitByLanguage
-            .map((chunk) => {
-              if (!chunk) return ""; // Skip empty strings from the split
+    // Match: Japanese character (excluding specific punctuation) followed by ASCII character (A-Z, a-z, 0-9)
+    formattedText = formattedText.replace(
+        /([^\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A])([A-Za-z0-9])/g,
+        (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
+    );
 
-              // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
-              if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
-                // This is an English chunk, wrap whole chunk in one span with Segoe UI
+    // Match: ASCII character (A-Z, a-z, 0-9) followed by Japanese character (excluding specific punctuation)
+    // The second replacement in the original code was adding a space after *every* ASCII character followed by a non-ASCII character,
+    // even if the non-ASCII character was Japanese punctuation (like 。、).
+    // The fix is to exclude the Japanese punctuation from the second group as well.
+    formattedText = formattedText.replace(
+        /([A-Za-z0-9])([^\x00-\x7F\r\n\s\u3000-\u3002\u300C\u300D\uFF0C\uFF0E\uFF1B\uFF1A])/g,
+        (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
+    );
+
+    // ---
+    // 2. Wrap only ASCII/English chunks in an explicit Segoe UI span
+
+    // Regex to split: ([^\x00-\x7F\r\n]+) catches non-ASCII (Japanese) runs and includes them in the array.
+    // The remaining chunks are ASCII/English (including the newly added spaces and other ASCII punctuation).
+    const splitByLanguage = formattedText.split(/([^\x00-\x7F\r\n]+)/g);
+
+    formattedText = splitByLanguage
+        .map((chunk) => {
+            if (!chunk) return ""; // Skip empty strings from the split
+
+            // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
+            // The original logic here was already correct: check if the chunk only contains ASCII characters.
+            if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
+                // This is an English/ASCII chunk, wrap whole chunk in one span with Segoe UI
+                // Note: It's good practice to enclose font names with spaces in quotes.
                 return `<span style="font-family: 'Segoe UI', sans-serif;">${chunk}</span>`;
-              } else {
-                // Japanese or non-English chunk, return as is (it will inherit the Yu Gothic UI from the parent)
+            } else {
+                // Japanese or non-English chunk, return as is (it will inherit the intended Japanese font from the parent)
                 return chunk;
-              }
-            })
-            .join("");
-        }
+            }
+        })
+        .join("");
+}
 
         // Convert remaining newlines to <br> tags. Using <br /> for maximum email compatibility.
         formattedText = formattedText.replace(/\n/g, "<br />");
