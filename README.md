@@ -1,65 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InstaFont README</title>
-    <style>
-        body {
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px 30px;
-            background: #ffffff;
-            color: #333;
-            line-height: 1.6;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-        h1, h2, h3 {
-            color: #34495e;
-        }
-        h1 {
-            font-size: 2.2rem;
-            text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            font-size: 1.6rem;
-            margin-top: 30px;
-            border-left: 5px solid #3498db;
-            padding-left: 10px;
-        }
-        p {
-            margin-bottom: 15px;
-        }
-        .highlight {
-            background-color: #ecf0f1;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        ul {
-            list-style-type: disc;
-            margin-left: 20px;
-            margin-bottom: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f5f5f5;
-            padding: 1px 4px;
-            border-radius: 3px;
-            color: #c0392b;
-        }
-    </style>
-</head>
-<body>
+
 
     <h1>InstaFont: Multi-Language HTML Formatter</h1>
 
@@ -100,5 +39,3 @@
         <li><strong>No External Styling:</strong> The application only applies <span class="highlight">font-family</span> and <span class="highlight">font-size</span> via inline styles. It does not apply any other styling like <span class="highlight">padding</span>, <span class="highlight">margin</span>, or <span class="highlight">color</span>.</li>
     </ul>
 
-</body>
-</html>
