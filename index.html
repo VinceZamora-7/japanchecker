@@ -483,7 +483,7 @@
           return;
         }
 
-        // Insert newline before each <span> for better readability in the copied text
+
         // Use a trim() to remove any leading newline that might be created by the first replace.
         const formattedForCopy = rawFormattedHTML
           .replace(/<span/g, "\n<span")
