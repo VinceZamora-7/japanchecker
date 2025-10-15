@@ -81,7 +81,34 @@
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
       }
 
-      button {
+      .toolbar {
+        display: flex;
+        padding: 5px 25px 30px;
+        gap: 5px;
+      }
+      .toolbar-label {
+        margin-bottom: 0px;
+      }
+      .toolbar .btn {
+        margin: 0px;
+        padding: 0px;
+        height: 40px;
+        width: 40px;
+        background-color: #ffffff;
+        outline: none;
+        border: none;
+        font-size: 1rem;
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
+        border-radius: 5px;
+        transition: all 0.3s ease;
+      }
+      .toolbar .btn:hover {
+        background-color: #2c80cc;
+        color: #ffffff;
+        transition: all 0.3s ease;
+      }
+
+      .btnForCode {
         display: inline-block;
         background-color: #3498db;
         color: white;
@@ -277,12 +304,28 @@
       </select>
       <span class="note">Choose language for corresponding font style</span>
     </div>
-
+    <label class="toolbar-label" for="languageSelect">Toolbar</label>
+    <div class="toolbar">
+      <button class="btn"><b>B</b></button>
+      <button class="btn"><i>I</i></button>
+      <button class="btn"><u>U</u></button>
+      <button class="btn"><s> S </s></button>
+      <button class="btn">🔗</button>
+      <input type="color" class="btn" />
+      <button class="btn">A<sub>x</sub></button>
+      <button class="btn">A<sup>x</sup></button>
+      <button class="btn">OL</button>
+      <button class="btn">UL</button>
+      <button class="btn"><b>→</b></button>
+      <button class="btn"><b>←</b></button>
+    </div>
     <label for="inputText">Enter your text below:</label>
     <textarea id="inputText" placeholder="Paste your text here…"></textarea>
 
-    <button onclick="formatText()">Format Text</button>
-    <button id="btnCopy" onclick="copyOutput()">Copy Code</button>
+    <button class="btnForCode" onclick="formatText()">Format Text</button>
+    <button class="btnForCode" id="btnCopy" onclick="copyOutput()">
+      Copy Code
+    </button>
 
     <div class="output-container">
       <div>
@@ -331,38 +374,29 @@
           }
         );
 
-        // Add visual newline before each closing tag's *first span* for better readability
-        escaped = escaped.replace(/(&lt;\/[^&]*?&gt;)/g, "\n$1");
+        // Removed the intentional newline for code readability.
+        // The code output will now be a single continuous line.
 
         return escaped;
       }
 
       function highlightNonEnglishChars(text, selectedFont) {
-        // Get current font size from input
         const fontSizeInput = document.getElementById("fontSizeInput");
         const fontSize = fontSizeInput ? fontSizeInput.value.trim() : "10.5";
-
-        // Split text into array of characters, handling surrogate pairs correctly
         const chars = [...text];
 
-        // Build HTML with spans and tooltips
         return chars
           .map((char) => {
-            // Check for non-ASCII characters (generally non-English)
             const isNonEnglish = /[^\x00-\x7F]/.test(char);
-            // Set font-family based on character type
             const fontFamily = isNonEnglish ? selectedFont : "'Segoe UI'";
             const highlightClass = isNonEnglish ? "highlight-nonenglish" : "";
-            // Escape char for HTML, use non-breaking space for spaces to make tooltips work
             const escapedChar = char === " " ? "\u00A0" : escapeHTML(char);
 
-            // Tooltip content text
             const tooltipText = `Font: ${fontFamily.replace(
               /'/g,
               ""
             )}, Size: ${fontSize}pt`;
 
-            // Apply font-family style directly to the span for the preview area
             return `<span class="char-span ${highlightClass}" tabindex="0" style="font-family:${fontFamily}">${escapedChar}<span class="tooltip">${tooltipText}</span></span>`;
           })
           .join("");
@@ -390,90 +424,45 @@
         const isArabic = selectedText === "Arabic";
 
         if (isJapanese) {
-          // ---
-          // JAPANESE (Han-Ei separation) Logic
-          // This logic inserts a half-width space between Japanese words/phrases and English/numeric text,
-          // but avoids inserting spaces around punctuation symbols that already handle kerning/spacing.
+          // **FINAL UPDATE:** Use a specific Unicode range for Kanji, Hiragana, and Katakana
+          // to avoid checking against any punctuation (ASCII or full-width Japanese).
+          // Unicode blocks: Hiragana (\u3040-\u309F), Katakana (\u30A0-\u30FF), CJK Ideographs (\u4E00-\u9FAF)
+          const japaneseCharRegex =
+            /([\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF])/;
 
-          // Common ASCII punctuation/symbols that should NOT have a space added next to them when bordering Japanese text.
-          const ASCII_PUNCTUATION =
-            "[\\.\\,\\!\\?\\:\\;\\-\\/\\(\\)[\\]\\{\\}\\<\\>]";
+          // 1. Add space between a Japanese Character and an ASCII character (A-Z, 0-9)
+          formattedText = formattedText
+            .replace(
+              new RegExp(`${japaneseCharRegex.source}([A-Za-z0-9])`, "g"),
+              (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
+            )
+            // 2. Add space between an ASCII character (A-Z, 0-9) and a Japanese Character
+            .replace(
+              new RegExp(`([A-Za-z0-9])${japaneseCharRegex.source}`, "g"),
+              (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
+            );
 
-          // Non-ASCII (Japanese) punctuation/symbols which already provide appropriate kerning/spacing.
-          // Includes full-width and specific Japanese symbols (e.g., 。、「」～…！？」）
-          const JAPANESE_PUNCTUATION_SYMBOLS =
-            "[\\u3000-\\u3002\\u300C-\\u300F\\u301D\\u301F\\uFE30-\\uFE44\\uFF01\\uFF09\\uFF0A\\uFF0C\\uFF0E\\uFF1F\\uFF3D\\uFF3E\\uFF5C\\uFF5E-\\uFF60\\u2026\\u2014\\u25EF]";
-
-          // Define the core character sets for spacing rules using negative lookahead:
-
-          // Japanese characters (Kanji, Hiragana, Katakana) excluding punctuation.
-          // This is a complex pattern that matches any non-ASCII char, provided it's NOT in the list of symbols.
-          const JAPANESE_CORE_CHAR = `(?![${JAPANESE_PUNCTUATION_SYMBOLS}])([^\\x00-\\x7F\\r\\n\\s])`;
-
-          // ASCII characters (letters, numbers) excluding common punctuation and also excluding spaces/newlines from the match group.
-          const ASCII_CORE_CHAR = `(?![${ASCII_PUNCTUATION}])([\\w])`;
-
-          // Original comprehensive non-ASCII regex, used only for the splitting part (step 3).
-          const JAPANESE_CHAR_FOR_SPLIT = "[^\\x00-\\x7F\\r\\n]+";
-
-          // 1. Insert space between a NON-PUNCTUATION Japanese character and a following ASCII CORE character (letter/number)
-          // e.g., 寿司World -> 寿司 World
+          // Apply 'Segoe UI' font to all contiguous ASCII characters and spaces
           formattedText = formattedText.replace(
-            new RegExp(`(${JAPANESE_CORE_CHAR})(${ASCII_CORE_CHAR})`, "g"),
-            (match, jpChar, asciiChar) => `${jpChar} ${asciiChar}`
+            /([A-Za-z0-9\s]+)/g,
+            (match) =>
+              `<span style="font-family: 'Segoe UI', sans-serif">${match}</span>`
           );
-
-          // 2. Insert space between an ASCII CORE character (letter/number) and a following NON-PUNCTUATION Japanese character
-          // e.g., Hello世界 -> Hello 世界
-          formattedText = formattedText.replace(
-            new RegExp(`(${ASCII_CORE_CHAR})(${JAPANESE_CORE_CHAR})`, "g"),
-            (match, asciiChar, jpChar) => `${asciiChar} ${jpChar}`
-          );
-
-          // ---
-          // 3. Wrap only ASCII/English chunks in an explicit Segoe UI span
-          // We use the comprehensive non-ASCII definition here to capture ALL non-English text for splitting.
-          const splitByLanguage = formattedText.split(
-            new RegExp(`(${JAPANESE_CHAR_FOR_SPLIT})`, "g")
-          );
-
-          formattedText = splitByLanguage
-            .map((chunk) => {
-              if (!chunk) return "";
-
-              // Test if chunk is purely ASCII (English/Latin text, numbers, symbols, spaces, etc.)
-              if (/^[\x00-\x7F\r\n]+$/.test(chunk)) {
-                // This is an English/ASCII chunk. Wrap the whole chunk in one span with Segoe UI.
-                return `<span style="font-family: 'Segoe UI', sans-serif;">${chunk}</span>`;
-              } else {
-                // Japanese or non-English chunk (already has the right font from the parent).
-                return chunk;
-              }
-            })
-            .join("");
         }
-        // Convert remaining newlines to <br> tags. Using <br /> for maximum email compatibility.
-        formattedText = formattedText.replace(/\n/g, "<br />");
 
-        // Determine the outer wrapper tag and attributes
-        // NOTE: Keeping `div` for Japanese for block-level content, as a `p` tag might introduce unwanted margins.
+        formattedText = formattedText.replace(/\n/g, "<br>");
         let wrapperTag = isJapanese ? "div" : "p";
         let dirAttr = isArabic ? ' dir="rtl"' : "";
-        // Use `text-align: inherit;` for Arabic to ensure right alignment unless overridden by an email client
         let extraStyle = isArabic ? "text-align: right;" : "";
 
-        // Construct the final HTML for the email
         rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
 
-        // Display the highlighted HTML code
         document.getElementById("output").innerHTML =
           syntaxHighlight(rawFormattedHTML);
-
-        // Display the non-English character preview
         document.getElementById("nonEnglishOutput").innerHTML =
           highlightNonEnglishChars(inputText, selectedFont);
 
-        // Render to live preview
+        // New: Render to live preview
         document.getElementById("previewArea").innerHTML = rawFormattedHTML;
       }
 
@@ -483,11 +472,9 @@
           return;
         }
 
-
-        // Use a trim() to remove any leading newline that might be created by the first replace.
-        const formattedForCopy = rawFormattedHTML
-          .replace(/<span/g, "\n<span")
-          .trim();
+        // REMOVED the line that inserted newlines for readability.
+        // The copied code is now a single, continuous line.
+        const formattedForCopy = rawFormattedHTML;
 
         navigator.clipboard.writeText(formattedForCopy).then(
           () => {
