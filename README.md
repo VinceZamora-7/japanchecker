@@ -1,4 +1,4 @@
-# InstaFont: Multi-Language HTML Formatter README
+# InstaFont: Multi-Language HTML Formatter
 
 **InstaFont** is a client-side utility designed to format text for HTML environments, specifically focusing on multi-language content within a single block of text. It automatically applies Microsoft-recommended font families based on the language script to ensure consistent and correct rendering, particularly useful for email templates that often struggle with mixed-script typography.
 
