@@ -455,7 +455,7 @@
         let dirAttr = isArabic ? ' dir="rtl"' : "";
         let extraStyle = isArabic ? "text-align: right;" : "";
 
-        rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
+        rawFormattedHTML = `<${wrapperTag} style="font-family:${selectedFont};color: #000000;font-size: ${fontSize}pt;${extraStyle}"${dirAttr}>${formattedText}</${wrapperTag}>`;
 
         document.getElementById("output").innerHTML =
           syntaxHighlight(rawFormattedHTML);
